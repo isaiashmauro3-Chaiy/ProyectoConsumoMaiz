@@ -48,7 +48,18 @@ parseAndInitData(rawCsvData);
 function parseAndInitData(csvText) {
     const lines = csvText.split('\n').map(line => line.trim()).filter(line => line);
     for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(',');
+        // Parseador de CSV mejorado para tolerar comillas y comas en miles (ej. "672,812.27")
+        const cols = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let j = 0; j < lines[i].length; j++) {
+            let c = lines[i][j];
+            if (c === '"') inQuotes = !inQuotes;
+            else if (c === ',' && !inQuotes) { cols.push(cur.replace(/,/g, '').trim()); cur = ''; }
+            else cur += c;
+        }
+        cols.push(cur.replace(/,/g, '').trim());
+        
         if (cols.length < 13) continue;
 
         let sembrada = parseFloat(cols[1]) || 0;
