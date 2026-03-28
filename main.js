@@ -35,7 +35,7 @@ function parseAndInitData(csvText) {
     for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(',');
         if (cols.length < 13) continue;
-        
+
         let sembrada = parseFloat(cols[1]) || 0;
         let cosechada = parseFloat(cols[2]) || 0;
         let siniestrada = parseFloat(cols[3]) || 0;
@@ -44,10 +44,10 @@ function parseAndInitData(csvText) {
         data.push({
             estado: cols[0],
             sembrada: sembrada,
-            cosechada: cosechada, 
-            siniestrada: siniestrada, 
+            cosechada: cosechada,
+            siniestrada: siniestrada,
             fugada: fugada,
-            produccion: parseFloat(cols[4]) || 0, 
+            produccion: parseFloat(cols[4]) || 0,
             rendimiento: parseFloat(cols[5]) || 0,
             semilla: parseFloat(cols[8]) || 0,
             familia: parseFloat(cols[9]) || 0,
@@ -57,7 +57,10 @@ function parseAndInitData(csvText) {
             consumoTotal: parseFloat(cols[13]) || 0
         });
     }
-    
+
+    // Ordenar de mayor a menor por producción total
+    data.sort((a, b) => b.produccion - a.produccion);
+
     states = data.map(item => item.estado);
     states.forEach(st => {
         const opt = document.createElement('option');
@@ -74,11 +77,11 @@ function parseAndInitData(csvText) {
 // 3. Histograma de Intervalos por Eficiencia (Rendimiento)
 function renderIntervalChart() {
     const buckets = [
-        { label: '0 a 2.5 ton/ha\n(Eficiencia Baja)', min: 0, max: 2.500, states: [], tooltipColor: '#ef4444', sumProduccion: 0, sumConsumo: 0 },     
-        { label: '2.5 a 5.0 ton/ha\n(Eficiencia Regular)', min: 2.501, max: 5.000, states: [], tooltipColor: '#f97316', sumProduccion: 0, sumConsumo: 0 }, 
-        { label: '5.0 a 7.5 ton/ha\n(Eficiencia Buena)', min: 5.001, max: 7.500, states: [], tooltipColor: '#fbbf24', sumProduccion: 0, sumConsumo: 0 },   
-        { label: '7.5 a 10.0 ton/ha\n(Eficiencia Muy Buena)', min: 7.501, max: 10.000, states: [], tooltipColor: '#34d399', sumProduccion: 0, sumConsumo: 0 }, 
-        { label: '+10.0 ton/ha\n(Nivel Exportación)', min: 10.001, max: 99999, states: [], tooltipColor: '#3b82f6', sumProduccion: 0, sumConsumo: 0 }    
+        { label: '0 a 2.5 ton/ha\n(Eficiencia Baja)', min: 0, max: 2.500, states: [], tooltipColor: '#ef4444', sumProduccion: 0, sumConsumo: 0 },
+        { label: '2.5 a 5.0 ton/ha\n(Eficiencia Regular)', min: 2.501, max: 5.000, states: [], tooltipColor: '#f97316', sumProduccion: 0, sumConsumo: 0 },
+        { label: '5.0 a 7.5 ton/ha\n(Eficiencia Buena)', min: 5.001, max: 7.500, states: [], tooltipColor: '#fbbf24', sumProduccion: 0, sumConsumo: 0 },
+        { label: '7.5 a 10.0 ton/ha\n(Eficiencia Muy Buena)', min: 7.501, max: 10.000, states: [], tooltipColor: '#34d399', sumProduccion: 0, sumConsumo: 0 },
+        { label: '+10.0 ton/ha\n(Nivel Exportación)', min: 10.001, max: 99999, states: [], tooltipColor: '#3b82f6', sumProduccion: 0, sumConsumo: 0 }
     ];
 
     data.forEach(item => {
@@ -108,19 +111,19 @@ function renderIntervalChart() {
             confine: true,
             enterable: true,
             extraCssText: 'max-height: 320px; overflow-y: auto; pointer-events: auto;',
-            formatter: function(params) {
+            formatter: function (params) {
                 const index = params[0].dataIndex;
                 const b = buckets[index];
-                
-                let statesListHtml = b.states.length === 0 
+
+                let statesListHtml = b.states.length === 0
                     ? '<tr><td colspan="2" class="text-slate-400 italic pt-2 pb-1">Ningún estado en este rango</td></tr>'
-                    : b.states.sort((a,b) => b.rendimiento - a.rendimiento).map(s => 
+                    : b.states.sort((a, b) => b.rendimiento - a.rendimiento).map(s =>
                         `<tr>
                             <td class="text-slate-300 pr-5 py-0.5 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${b.tooltipColor}"></span>${s.estado}</td>
                             <td class="font-mono text-emerald-300 text-right py-0.5 font-bold">${formatNumber(s.rendimiento)} <span class="text-xs text-slate-400 font-normal">ton/ha</span></td>
                         </tr>`
-                      ).join('');
-                
+                    ).join('');
+
                 return `
                     <div class="font-extrabold mb-2 text-lg text-emerald-400 border-b border-slate-600 pb-2">${b.label.replace('\n', ' ')}</div>
                     
@@ -247,20 +250,20 @@ function renderProdIntervalChart() {
             confine: true,
             enterable: true,
             extraCssText: 'max-height: 320px; overflow-y: auto; pointer-events: auto;',
-            formatter: function(params) {
+            formatter: function (params) {
                 const index = params[0].dataIndex;
                 const b = buckets[index];
                 const pct = ((b.sumProduccion / totalNacional) * 100).toFixed(2);
-                
-                let statesListHtml = b.states.length === 0 
+
+                let statesListHtml = b.states.length === 0
                     ? '<tr><td colspan="2" class="text-slate-400 italic pt-2 pb-1">Ningún estado en esta categoría</td></tr>'
-                    : b.states.sort((a,b) => b.produccion - a.produccion).map(s => 
+                    : b.states.sort((a, b) => b.produccion - a.produccion).map(s =>
                         `<tr>
                             <td class="text-slate-300 pr-5 py-0.5 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${b.tooltipColor}"></span>${s.estado}</td>
                             <td class="font-mono text-emerald-300 text-right py-0.5 font-bold">${formatNumber(s.produccion)} <span class="text-xs text-slate-400 font-normal">ton</span></td>
                         </tr>`
-                      ).join('');
-                
+                    ).join('');
+
                 return `
                     <div class="font-extrabold mb-2 text-lg text-blue-400 border-b border-slate-600 pb-2">${b.label.replace('\n', ' ')}</div>
                     
@@ -354,9 +357,9 @@ function initOptions() {
             axisPointer: { type: 'shadow' },
             backgroundColor: 'rgba(15, 23, 42, 0.95)',
             borderColor: '#334155', borderWidth: 1, padding: [10, 14],
-            confine: true, 
+            confine: true,
             position: function (pt, params, dom, rect, size) {
-                let x = pt[0] + 20; 
+                let x = pt[0] + 20;
                 if (x + size.contentSize[0] > size.viewSize[0]) x = pt[0] - size.contentSize[0] - 20;
                 let y = pt[1] - (size.contentSize[1] / 3);
                 if (y < 70) y = 70;
@@ -395,35 +398,35 @@ function initOptions() {
             { start: 0, end: 100, borderColor: '#334155', textStyle: { color: '#cbd5e1' }, backgroundColor: 'rgba(30, 41, 59, 0.5)', fillerColor: 'rgba(52, 211, 153, 0.2)', bottom: 5, height: 20 }
         ],
         xAxis: {
-            type: 'category', 
-            data: states, 
-            triggerEvent: true, 
-            axisLabel: { 
+            type: 'category',
+            data: states,
+            triggerEvent: true,
+            axisLabel: {
                 color: '#94a3b8', interval: 0, rotate: 30, fontSize: 12, fontWeight: '500',
-                formatter: function(value) { return '{stateName|' + value + '}'; },
+                formatter: function (value) { return '{stateName|' + value + '}'; },
                 rich: { stateName: { color: '#94a3b8', backgroundColor: 'transparent', padding: [4, 4], borderRadius: 4, align: 'center' } }
             },
-            axisLine: { lineStyle: { color: '#475569', width: 2 } }, 
+            axisLine: { lineStyle: { color: '#475569', width: 2 } },
             axisTick: { show: false }
         },
         yAxis: [
             {
-                type: 'value', 
+                type: 'value',
                 name: 'Miles de Toneladas\n(x 1,000)',
                 nameLocation: 'end',
-                nameGap: 15, 
+                nameGap: 15,
                 nameTextStyle: { color: '#10b981', fontWeight: 'bold', fontSize: 12, align: 'left' },
                 axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: (value) => formatNumber(value) },
                 splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
             },
             {
-                type: 'value', 
-                name: 'Área Terrestre\n(Hectáreas)', 
+                type: 'value',
+                name: 'Área Terrestre\n(Hectáreas)',
                 nameLocation: 'end',
-                nameGap: 15, 
+                nameGap: 15,
                 nameTextStyle: { color: '#3b82f6', fontWeight: 'bold', fontSize: 12, align: 'right' },
                 axisLabel: { color: '#e2e8f0', fontWeight: '600', formatter: (value) => formatNumber(value) },
-                splitLine: { show: false } 
+                splitLine: { show: false }
             }
         ],
         series: [
@@ -445,20 +448,20 @@ function renderMainChart() {
     isMainChart = true;
     btnBack.classList.add('hidden');
     stateSelector.classList.remove('hidden');
-    stateSelector.value = ""; 
+    stateSelector.value = "";
 
     titleSpan.innerHTML = 'por Entidad';
     chartDesc.innerHTML = 'Comparativa de Producción vs Consumo y Métrica Terrestre General. Usa el menú contextual "Guía Rápida" arriba para ver los detalles de las líneas.';
-    
+
     myChart.clear();
-    myChart.setOption(mainOption, true); 
+    myChart.setOption(mainOption, true);
 }
 
 function renderStateChart(stateName) {
     isMainChart = false;
     const stateData = data.find(item => item.estado === stateName);
-    if(!stateData) return;
-    
+    if (!stateData) return;
+
     btnBack.classList.remove('hidden');
     stateSelector.classList.add('hidden');
 
@@ -481,7 +484,7 @@ function renderStateChart(stateName) {
                 if (y + size.contentSize[1] > size.viewSize[1]) y = size.viewSize[1] - size.contentSize[1] - 5;
                 return [x, y];
             },
-            formatter: function(params) {
+            formatter: function (params) {
                 const p = params[0];
                 const unit = p.name.includes('(ha)') ? ' ha.' : ' ton.';
                 return `<div class="font-extrabold mb-1.5 text-base text-emerald-400 border-b border-slate-600 pb-1.5">${p.name.replace('\n', ' ')}</div>
@@ -499,7 +502,7 @@ function renderStateChart(stateName) {
             type: 'value',
             name: '(Cifras Exactas)',
             nameLocation: 'end',
-            nameGap: 15, 
+            nameGap: 15,
             nameTextStyle: { color: '#10b981', fontWeight: 'bold', fontSize: 13, align: 'left' },
             axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: (val) => formatNumber(val) },
             splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
@@ -508,19 +511,19 @@ function renderStateChart(stateName) {
             type: 'bar',
             barWidth: '60%',
             data: [
-                { value: stateData.sembrada, rawValue: stateData.sembrada, itemStyle: { color: '#3b82f6', borderRadius: [4,4,0,0] } },
-                { value: stateData.cosechada, rawValue: stateData.cosechada, itemStyle: { color: '#10b981', borderRadius: [4,4,0,0] } },
-                { value: stateData.siniestrada, rawValue: stateData.siniestrada, itemStyle: { color: '#ef4444', borderRadius: [4,4,0,0] } },
-                { value: stateData.fugada, rawValue: stateData.fugada, itemStyle: { color: '#f97316', borderRadius: [4,4,0,0] } },
-                { value: stateData.produccion, rawValue: stateData.produccion, itemStyle: { color: '#94a3b8', borderRadius: [4,4,0,0] } },
-                { value: stateData.semilla, rawValue: stateData.semilla, itemStyle: { color: '#fbbf24', borderRadius: [4,4,0,0] } },
-                { value: stateData.familia, rawValue: stateData.familia, itemStyle: { color: '#f87171', borderRadius: [4,4,0,0] } },
-                { value: stateData.animales, rawValue: stateData.animales, itemStyle: { color: '#60a5fa', borderRadius: [4,4,0,0] } },
-                { value: stateData.ventaTotal, rawValue: stateData.ventaTotal, itemStyle: { color: '#34d399', borderRadius: [4,4,0,0] } },
-                { value: stateData.ventaExp, rawValue: stateData.ventaExp, itemStyle: { color: '#c084fc', borderRadius: [4,4,0,0] } }
+                { value: stateData.sembrada, rawValue: stateData.sembrada, itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.cosechada, rawValue: stateData.cosechada, itemStyle: { color: '#10b981', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.siniestrada, rawValue: stateData.siniestrada, itemStyle: { color: '#ef4444', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.fugada, rawValue: stateData.fugada, itemStyle: { color: '#f97316', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.produccion, rawValue: stateData.produccion, itemStyle: { color: '#94a3b8', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.semilla, rawValue: stateData.semilla, itemStyle: { color: '#fbbf24', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.familia, rawValue: stateData.familia, itemStyle: { color: '#f87171', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.animales, rawValue: stateData.animales, itemStyle: { color: '#60a5fa', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.ventaTotal, rawValue: stateData.ventaTotal, itemStyle: { color: '#34d399', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.ventaExp, rawValue: stateData.ventaExp, itemStyle: { color: '#c084fc', borderRadius: [4, 4, 0, 0] } }
             ],
             label: {
-                show: true,           
+                show: true,
                 position: 'top',
                 color: '#f8fafc',
                 fontWeight: 'bold',
@@ -529,7 +532,7 @@ function renderStateChart(stateName) {
             }
         }]
     };
-    
+
     myChart.clear();
     myChart.setOption(stateOption, true);
 }
@@ -539,41 +542,41 @@ stateSelector.addEventListener('change', (e) => {
     if (e.target.value) renderStateChart(e.target.value);
 });
 
-myChart.on('click', function(params) {
+myChart.on('click', function (params) {
     if (params.componentType === 'series' && states.includes(params.name)) renderStateChart(params.name);
     else if (params.componentType === 'xAxis' && states.includes(params.value)) renderStateChart(params.value);
 });
 
-myChart.getZr().on('click', function(params) {
+myChart.getZr().on('click', function (params) {
     if (!params.target && isMainChart) {
         const pointInPixel = [params.offsetX, params.offsetY];
         if (myChart.containPixel('grid', pointInPixel)) {
-            const pointInGrid = myChart.convertFromPixel({seriesIndex: 0}, pointInPixel);
+            const pointInGrid = myChart.convertFromPixel({ seriesIndex: 0 }, pointInPixel);
             const stateName = states[pointInGrid[0]];
             if (stateName) renderStateChart(stateName);
         }
     }
 });
 
-myChart.getZr().on('mousemove', function(params) {
+myChart.getZr().on('mousemove', function (params) {
     if (!params.target && isMainChart) {
         const pointInPixel = [params.offsetX, params.offsetY];
         if (myChart.containPixel('grid', pointInPixel)) {
             myChart.getZr().setCursorStyle('pointer');
-            return; 
+            return;
         }
     }
 });
 
-myChart.on('mouseover', function(params) { if (params.componentType === 'xAxis') myChart.getZr().setCursorStyle('pointer'); });
-myChart.on('mouseout', function(params) { if (params.componentType === 'xAxis') myChart.getZr().setCursorStyle('default'); });
+myChart.on('mouseover', function (params) { if (params.componentType === 'xAxis') myChart.getZr().setCursorStyle('pointer'); });
+myChart.on('mouseout', function (params) { if (params.componentType === 'xAxis') myChart.getZr().setCursorStyle('default'); });
 
 btnBack.addEventListener('click', renderMainChart);
 
-window.addEventListener('resize', () => { 
-    setTimeout(() => { 
-        myChart.resize(); 
+window.addEventListener('resize', () => {
+    setTimeout(() => {
+        myChart.resize();
         intervalChart.resize();
         prodIntervalChart.resize();
-    }, 150); 
+    }, 150);
 });
