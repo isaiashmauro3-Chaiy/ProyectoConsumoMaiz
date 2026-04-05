@@ -2,9 +2,12 @@ const chartDom = document.getElementById('chart-container');
 const intervalChartDom = document.getElementById('interval-chart-container');
 const prodIntervalChartDom = document.getElementById('prod-interval-chart-container');
 
+const nationalChartDom = document.getElementById('national-chart-container');
+
 const myChart = echarts.init(chartDom, 'dark');
 const intervalChart = echarts.init(intervalChartDom, 'dark');
 const prodIntervalChart = echarts.init(prodIntervalChartDom, 'dark');
+const nationalChart = echarts.init(nationalChartDom, 'dark');
 
 const stateSelector = document.getElementById('state-selector');
 const btnBack = document.getElementById('btn-back');
@@ -98,6 +101,7 @@ function parseAndInitData(csvText) {
     renderMainChart();
     renderIntervalChart();
     renderProdIntervalChart();
+    renderNationalChart();
 }
 
 // 3. Histograma de Intervalos por Eficiencia (Rendimiento)
@@ -374,7 +378,67 @@ function renderProdIntervalChart() {
 }
 
 
-// 5. Configurar Layout Principal
+// 5. Gráfica Comparativa Nacional
+function renderNationalChart() {
+    const totalDatasetConsumo = data.reduce((sum, item) => sum + item.consumoTotal, 0);
+    // Consumo Promedio de Mexico = 45 millones exactos
+    const totalNacionalInternet = 45000000;
+    const deficitOImportacion = totalNacionalInternet - totalDatasetConsumo;
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#334155', borderWidth: 1, padding: [14, 18],
+            formatter: function(params) {
+                let html = '<div class="font-extrabold mb-2 text-lg text-purple-400 border-b border-slate-600 pb-2">Desglose de Totales</div>';
+                params.forEach(p => {
+                    html += '<div class="flex justify-between items-center mt-2 mb-1">';
+                    html += '<span class="text-sm font-semibold text-slate-300 mr-8">' + p.marker + ' ' + p.name + ':</span>';
+                    html += '<span class="font-mono font-bold text-white">' + formatNumber(p.value) + ' ton</span>';
+                    html += '</div>';
+                });
+                return html;
+            }
+        },
+        grid: { left: '10%', right: '10%', bottom: '15%', top: '15%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: ['Consumo 18 Estados (Dataset)', 'Déficit (Resto Estados + Importación)', 'Demanda Nacional Total (Internet)'],
+            axisLabel: { color: '#94a3b8', interval: 0, fontWeight: '600', fontSize: 13, lineHeight: 18 },
+            axisLine: { lineStyle: { color: '#475569', width: 2 } },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Toneladas Netas',
+            nameTextStyle: { color: '#8b5cf6', fontWeight: 'bold', fontSize: 13, align: 'left', padding: [0, 0, 10, -10] },
+            axisLabel: { color: '#94a3b8', fontWeight: 'bold', fontSize: 13, formatter: (val) => formatNumber(val) },
+            splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
+        },
+        series: [
+            {
+                name: 'Consumo Comparativo',
+                type: 'bar',
+                barWidth: '60%',
+                data: [
+                    { value: totalDatasetConsumo, itemStyle: { color: '#10b981', borderRadius: [6, 6, 0, 0] } },
+                    { value: deficitOImportacion, itemStyle: { color: '#f59e0b', borderRadius: [6, 6, 0, 0] } },
+                    { value: totalNacionalInternet, itemStyle: { color: '#8b5cf6', borderRadius: [6, 6, 0, 0] } }
+                ],
+                label: {
+                    show: true, position: 'top', color: '#fff', fontSize: 15, fontWeight: 'bold',
+                    formatter: (p) => formatNumber(p.value) + ' ton'
+                }
+            }
+        ]
+    };
+    nationalChart.setOption(option);
+}
+
+// 6. Configurar Layout Principal
 function initOptions() {
     mainOption = {
         backgroundColor: 'transparent',
@@ -604,5 +668,6 @@ window.addEventListener('resize', () => {
         myChart.resize();
         intervalChart.resize();
         prodIntervalChart.resize();
+        nationalChart.resize();
     }, 150);
 });
