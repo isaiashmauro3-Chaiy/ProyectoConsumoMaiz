@@ -449,6 +449,7 @@ function renderNationalChart() {
             }
         ]
     };
+    nationalChart.clear();
     nationalChart.setOption(option);
 }
 
