@@ -3,16 +3,22 @@ const intervalChartDom = document.getElementById('interval-chart-container');
 const prodIntervalChartDom = document.getElementById('prod-interval-chart-container');
 
 const nationalChartDom = document.getElementById('national-chart-container');
+const prodNationalChartDom = document.getElementById('prod-national-chart-container');
 
 const myChart = echarts.init(chartDom, 'dark');
 const intervalChart = echarts.init(intervalChartDom, 'dark');
 const prodIntervalChart = echarts.init(prodIntervalChartDom, 'dark');
 const nationalChart = echarts.init(nationalChartDom, 'dark');
+const prodNationalChart = echarts.init(prodNationalChartDom, 'dark');
 
 const stateSelector = document.getElementById('state-selector');
 const btnBack = document.getElementById('btn-back');
 const titleSpan = document.getElementById('chart-title-span');
 const chartDesc = document.getElementById('chart-description');
+const btnProdBack = document.getElementById('btn-prod-back');
+const prodNationalDesc = document.getElementById('prod-national-desc');
+
+let isProdNationalMain = true;
 
 // Utilities
 const formatNumber = (num) => new Intl.NumberFormat('es-MX', { maximumFractionDigits: 2 }).format(num);
@@ -102,6 +108,7 @@ function parseAndInitData(csvText) {
     renderIntervalChart();
     renderProdIntervalChart();
     renderNationalChart();
+    renderProdNationalChart();
 }
 
 // 3. Histograma de Intervalos por Eficiencia (Rendimiento)
@@ -438,7 +445,121 @@ function renderNationalChart() {
     nationalChart.setOption(option);
 }
 
-// 6. Configurar Layout Principal
+// 6. Gráfica Comparativa de Producción Nacional (Drilldown)
+function renderProdNationalChart() {
+    isProdNationalMain = true;
+    btnProdBack.classList.add('hidden');
+    prodNationalDesc.innerHTML = 'Comparativa de la Producción real de los 18 Estados en tu CSV vs la Producción Nacional Total (27,228,242 Toneladas). <br><b class="text-white">✨ ¡Haz clic en la barra del Dataset (Verde) para desglosar y ver exactamente cuánto produjo cada estado individualmente!</b>';
+
+    const totalProdDataset = data.reduce((sum, item) => sum + item.produccion, 0);
+    const totalProdNacional = 27228242;
+    const prodFaltante = totalProdNacional - totalProdDataset;
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#334155', borderWidth: 1, padding: [10, 14],
+            formatter: function(p) {
+                let extra = p.name === 'Producción 18 Estados (Dataset)' ? '<div class="text-xs text-yellow-300 mt-3 font-bold">👉 Haz clic para desglosar por estado</div>' : '';
+                return '<div class="font-extrabold mb-1.5 text-base border-b border-slate-600 pb-2" style="color: ' + p.color + ';">' + p.name + '</div>' + 
+                       '<div class="font-mono text-white text-lg mt-2">' + formatNumber(p.value) + ' ton</div>' + extra;
+            }
+        },
+        grid: { left: '10%', right: '10%', bottom: '15%', top: '15%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: ['Producción 18 Estados (Dataset)', 'Faltante (14 Estados Restantes)', 'Producción Nacional Total (SIAP 2019)'],
+            axisLabel: { color: '#e2e8f0', interval: 0, fontWeight: '600', fontSize: 13 },
+            axisLine: { lineStyle: { color: '#475569', width: 2 } },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Toneladas Producidas',
+            nameTextStyle: { color: '#fbbf24', fontWeight: 'bold', fontSize: 13, align: 'left', padding: [0, 0, 10, -10] },
+            axisLabel: { color: '#94a3b8', fontWeight: 'bold', fontSize: 13, formatter: (val) => formatNumber(val) },
+            splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
+        },
+        series: [
+            {
+                type: 'bar',
+                barWidth: '60%',
+                data: [
+                    { value: totalProdDataset, itemStyle: { color: '#10b981', borderRadius: [6, 6, 0, 0] } },
+                    { value: prodFaltante, itemStyle: { color: '#f97316', borderRadius: [6, 6, 0, 0] } },
+                    { value: totalProdNacional, itemStyle: { color: '#eab308', borderRadius: [6, 6, 0, 0] } }
+                ],
+                label: {
+                    show: true, position: 'top', color: '#fff', fontSize: 15, fontWeight: 'bold',
+                    formatter: (p) => formatNumber(p.value) + ' ton'
+                }
+            }
+        ]
+    };
+    prodNationalChart.clear();
+    prodNationalChart.setOption(option);
+}
+
+function renderProdDrilldown() {
+    isProdNationalMain = false;
+    btnProdBack.classList.remove('hidden');
+    prodNationalDesc.innerHTML = 'Desglose detallado de la producción de los 18 estados analizados, ordenados de mayor a menor volumen (Totalizando el bloque verde anterior).';
+
+    const sortedData = [...data].sort((a, b) => b.produccion - a.produccion);
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#334155', borderWidth: 1, padding: [10, 14],
+            formatter: function(params) {
+                const p = params[0];
+                return '<div class="font-extrabold mb-1.5 text-base text-emerald-400 border-b border-slate-600 pb-1.5">' + p.name + '</div>' + 
+                       '<div class="font-mono text-white text-base mt-2">' + formatNumber(p.value) + ' ton</div>';
+            }
+        },
+        grid: { left: '5%', right: '5%', bottom: '22%', top: '15%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: sortedData.map(i => i.estado),
+            axisLabel: { color: '#94a3b8', interval: 0, rotate: 35, fontWeight: '600', fontSize: 12 },
+            axisLine: { lineStyle: { color: '#475569', width: 2 } },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Toneladas Producidas',
+            nameTextStyle: { color: '#10b981', fontWeight: 'bold', fontSize: 13, align: 'left', padding: [0, 0, 10, -10] },
+            axisLabel: { color: '#94a3b8', fontWeight: 'bold', fontSize: 13, formatter: (val) => formatNumber(val) },
+            splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
+        },
+        series: [
+            {
+                type: 'bar',
+                data: sortedData.map(i => ({ value: i.produccion, itemStyle: { color: '#10b981', borderRadius: [4, 4, 0, 0] } })),
+                label: {
+                    show: true, position: 'top', color: '#f8fafc', fontSize: 11, fontWeight: 'bold', rotate: 45, horizontalAlign: 'left', verticalAlign: 'middle', distance: 10,
+                    formatter: (p) => formatNumber(p.value)
+                }
+            }
+        ]
+    };
+    prodNationalChart.clear();
+    prodNationalChart.setOption(option);
+}
+
+prodNationalChart.on('click', function(params) {
+    if (isProdNationalMain && params.name === 'Producción 18 Estados (Dataset)') {
+        renderProdDrilldown();
+    }
+});
+btnProdBack.addEventListener('click', renderProdNationalChart);
+
+// 7. Configurar Layout Principal
 function initOptions() {
     mainOption = {
         backgroundColor: 'transparent',
@@ -669,5 +790,6 @@ window.addEventListener('resize', () => {
         intervalChart.resize();
         prodIntervalChart.resize();
         nationalChart.resize();
+        prodNationalChart.resize();
     }, 150);
 });

@@ -162,6 +162,22 @@
             </p>
             <div id="national-chart-container" class="w-full h-full flex-grow min-h-[300px]"></div>
         </div>
+
+        <!-- Quinta Gráfica: Comparativa Nacional de Producción (Drilldown) -->
+        <div
+            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-4">
+            <div class="flex justify-between items-start mb-2">
+                <h2 class="text-xl sm:text-2xl font-bold text-yellow-400">Desempeño de Producción Nacional (SIAP 2019)</h2>
+                <button id="btn-prod-back" class="hidden bg-yellow-600 hover:bg-yellow-500 text-slate-900 font-bold py-1.5 px-4 rounded shadow-lg transition-all text-sm flex items-center gap-2">
+                    ⬅️ Regresar a Totales
+                </button>
+            </div>
+            <p class="text-slate-300 text-sm mb-4 leading-relaxed" id="prod-national-desc">
+                Comparativa de la Producción real de los 18 Estados en tu CSV vs la Producción Nacional Total (27,228,242 Toneladas). 
+                <br><b>✨ ¡Haz clic en la barra del Dataset (Verde) para desglosar y ver exactamente cuánto produjo cada estado individualmente!</b>
+            </p>
+            <div id="prod-national-chart-container" class="w-full h-full flex-grow min-h-[350px]"></div>
+        </div>
     </main>
     <script src="main.js"></script>
 </body>
