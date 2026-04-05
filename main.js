@@ -554,32 +554,27 @@ function renderProdDrilldown() {
     prodNationalChart.setOption(option);
 }
 
-function renderMissingStatesDrilldown(totalFaltante) {
+function renderMissingStatesDrilldown() {
     isProdNationalMain = false;
     btnProdBack.classList.remove('hidden');
-    prodNationalDesc.innerHTML = 'Desglose interactivo estimado de la producción de los 14 estados ausentes. Calculado matemáticamente distribuyendo el déficit por el peso histórico nacional de siembra.';
+    prodNationalDesc.innerHTML = 'Desglose interactivo exacto de la producción de los 14 estados ausentes. Tomado directamente del tabulador real del Cierre Agrícola 2018-2019.';
 
-    const missingStatesWeights = [
-        { estado: 'Guanajuato', pct: 0.33 },
-        { estado: 'Tamaulipas', pct: 0.20 },
-        { estado: 'Campeche', pct: 0.08 },
-        { estado: 'Tlaxcala', pct: 0.07 },
-        { estado: 'San Luis Potosí', pct: 0.07 },
-        { estado: 'Tabasco', pct: 0.05 },
-        { estado: 'Morelos', pct: 0.04 },
-        { estado: 'Yucatán', pct: 0.04 },
-        { estado: 'Quintana Roo', pct: 0.03 },
-        { estado: 'Sonora', pct: 0.03 },
-        { estado: 'Aguascalientes', pct: 0.02 },
-        { estado: 'Coahuila', pct: 0.02 },
-        { estado: 'Colima', pct: 0.015 },
-        { estado: 'Ciudad de México', pct: 0.005 }
+    const missingData = [
+        { name: 'Guanajuato', value: 1391741.15 },
+        { name: 'Tamaulipas', value: 820971.23 },
+        { name: 'Sonora', value: 692277.31 },
+        { name: 'Tlaxcala', value: 215295.04 },
+        { name: 'Campeche', value: 162147.63 },
+        { name: 'Tabasco', value: 150204.85 },
+        { name: 'San Luis Potosí', value: 143733.63 },
+        { name: 'Morelos', value: 86523.16 },
+        { name: 'Yucatán', value: 74050.27 },
+        { name: 'Aguascalientes', value: 69807.47 },
+        { name: 'Colima', value: 58558.71 },
+        { name: 'Quintana Roo', value: 47604.57 },
+        { name: 'Coahuila', value: 30929.28 },
+        { name: 'Ciudad de México', value: 4834.58 }
     ];
-
-    const missingData = missingStatesWeights.map(i => ({
-        name: i.estado,
-        value: totalFaltante * i.pct
-    }));
 
     const option = {
         backgroundColor: 'transparent',
@@ -629,10 +624,7 @@ prodNationalChart.on('click', function(params) {
         if (params.name === 'Producción 18 Estados (Dataset)') {
             renderProdDrilldown();
         } else if (params.name === 'Faltante (14 Estados Restantes)') {
-            const totalProdDataset = data.reduce((sum, item) => sum + item.produccion, 0);
-            const totalProdNacional = 27228242;
-            const prodFaltante = totalProdNacional - totalProdDataset;
-            renderMissingStatesDrilldown(prodFaltante);
+            renderMissingStatesDrilldown();
         }
     }
 });
