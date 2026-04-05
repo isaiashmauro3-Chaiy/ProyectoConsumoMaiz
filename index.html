@@ -165,7 +165,7 @@
 
         <!-- Quinta Gráfica: Comparativa Nacional de Producción (Drilldown) -->
         <div
-            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-4">
+            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-6">
             <div class="flex justify-between items-start mb-2">
                 <h2 class="text-xl sm:text-2xl font-bold text-yellow-400">Desempeño de Producción Nacional (SIAP 2019)</h2>
                 <button id="btn-prod-back" class="hidden bg-yellow-600 hover:bg-yellow-500 text-slate-900 font-bold py-1.5 px-4 rounded shadow-lg transition-all text-sm flex items-center gap-2">
@@ -177,6 +177,38 @@
                 <br><b>✨ ¡Haz clic en la barra del Dataset (Verde) para desglosar y ver exactamente cuánto produjo cada estado individualmente!</b>
             </p>
             <div id="prod-national-chart-container" class="w-full h-full flex-grow min-h-[350px]"></div>
+        </div>
+
+        <!-- Evidencias y Fuentes -->
+        <div class="bg-indigo-950/40 backdrop-blur-sm rounded-xl shadow-inner border border-indigo-500/30 p-5 w-full flex-shrink-0 relative flex flex-col mb-4 overflow-hidden">
+            <h2 class="text-xl font-bold text-indigo-300 mb-4 flex items-center gap-2">
+                <span>📚</span> Evidencia Documental y Referencias
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Evidencia 1 -->
+                <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-700 shadow-sm relative">
+                    <p class="text-sm text-slate-300 leading-relaxed mb-3">
+                        Basado en los informes del Año Agrícola 2018-2019 de la Secretaría de Agricultura y Desarrollo Rural (SADER), Guanajuato se consolidó como uno de los principales productores de maíz grano en México.
+                    </p>
+                    <ul class="list-disc ml-5 text-sm text-slate-200">
+                        <li><span class="font-bold text-white">Producción aproximada:</span> Guanajuato produjo <span class="bg-yellow-500/20 text-yellow-300 px-1 rounded">más de un millón de toneladas</span> de maíz grano en el ciclo 2018-2019.</li>
+                    </ul>
+                </div>
+                <!-- Evidencia 2 -->
+                <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-700 shadow-sm relative">
+                    <p class="text-sm text-slate-300 leading-relaxed mb-3">
+                        México produce en promedio alrededor de <span class="font-bold text-yellow-400">27 a 28 millones de toneladas</span> de maíz grano al año. Sin embargo, el consumo nacional total, impulsado por la alta demanda de la industria pecuaria (alimento para ganado), ronda los <span class="bg-blue-500/20 text-blue-300 px-1 rounded font-bold">45.8 millones de toneladas</span>, lo que genera una dependencia de importaciones.
+                    </p>
+                    <ul class="list-disc ml-5 text-sm text-slate-200 mb-2 space-y-1">
+                        <li><span class="font-bold text-white">Producción (Promedio):</span> ~27-28 millones de toneladas (siendo Sinaloa, Jalisco y Sonora los principales).</li>
+                        <li><span class="font-bold text-white">Consumo Total:</span> ~45.8 millones de toneladas (incluyendo consumo humano, industrial y forrajero).</li>
+                        <li><span class="font-bold text-white">Déficit:</span> México es autosuficiente en maíz blanco, pero importa una gran cantidad de maíz amarillo.</li>
+                    </ul>
+                    <div class="text-xs text-slate-400 border-t border-slate-700 pt-2 flex items-center gap-1">
+                        <span class="inline-block w-2 H-2 rounded-full bg-amber-600"></span> El consumo per cápita de maíz blanco para consumo humano directo es alto, situándose en cerca de 196.4 kg al año por persona.
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
     <script src="main.js"></script>

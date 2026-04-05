@@ -388,8 +388,8 @@ function renderProdIntervalChart() {
 // 5. Gráfica Comparativa Nacional
 function renderNationalChart() {
     const totalDatasetConsumo = data.reduce((sum, item) => sum + item.consumoTotal, 0);
-    // Consumo Promedio de Mexico = 45 millones exactos
-    const totalNacionalInternet = 45000000;
+    // Consumo Promedio de Mexico = 45.8 millones
+    const totalNacionalInternet = 45800000;
     const deficitOImportacion = totalNacionalInternet - totalDatasetConsumo;
 
     const option = {
