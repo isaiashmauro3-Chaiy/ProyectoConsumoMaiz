@@ -462,7 +462,9 @@ function renderProdNationalChart() {
             backgroundColor: 'rgba(15, 23, 42, 0.95)',
             borderColor: '#334155', borderWidth: 1, padding: [10, 14],
             formatter: function(p) {
-                let extra = p.name === 'Producción 18 Estados (Dataset)' ? '<div class="text-xs text-yellow-300 mt-3 font-bold">👉 Haz clic para desglosar por estado</div>' : '';
+                let extra = '';
+                if (p.name === 'Producción 18 Estados (Dataset)') extra = '<div class="text-xs text-yellow-300 mt-3 font-bold">👉 Haz clic para desglosar por estado</div>';
+                if (p.name === 'Faltante (14 Estados Restantes)') extra = '<div class="text-xs text-orange-300 mt-3 font-bold animate-pulse">👉 Haz clic para desglosar estados faltantes</div>';
                 return '<div class="font-extrabold mb-1.5 text-base border-b border-slate-600 pb-2" style="color: ' + p.color + ';">' + p.name + '</div>' + 
                        '<div class="font-mono text-white text-lg mt-2">' + formatNumber(p.value) + ' ton</div>' + extra;
             }
@@ -552,9 +554,86 @@ function renderProdDrilldown() {
     prodNationalChart.setOption(option);
 }
 
+function renderMissingStatesDrilldown(totalFaltante) {
+    isProdNationalMain = false;
+    btnProdBack.classList.remove('hidden');
+    prodNationalDesc.innerHTML = 'Desglose interactivo estimado de la producción de los 14 estados ausentes. Calculado matemáticamente distribuyendo el déficit por el peso histórico nacional de siembra.';
+
+    const missingStatesWeights = [
+        { estado: 'Guanajuato', pct: 0.33 },
+        { estado: 'Tamaulipas', pct: 0.20 },
+        { estado: 'Campeche', pct: 0.08 },
+        { estado: 'Tlaxcala', pct: 0.07 },
+        { estado: 'San Luis Potosí', pct: 0.07 },
+        { estado: 'Tabasco', pct: 0.05 },
+        { estado: 'Morelos', pct: 0.04 },
+        { estado: 'Yucatán', pct: 0.04 },
+        { estado: 'Quintana Roo', pct: 0.03 },
+        { estado: 'Sonora', pct: 0.03 },
+        { estado: 'Aguascalientes', pct: 0.02 },
+        { estado: 'Coahuila', pct: 0.02 },
+        { estado: 'Colima', pct: 0.015 },
+        { estado: 'Ciudad de México', pct: 0.005 }
+    ];
+
+    const missingData = missingStatesWeights.map(i => ({
+        name: i.estado,
+        value: totalFaltante * i.pct
+    }));
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#334155', borderWidth: 1, padding: [10, 14],
+            formatter: function(params) {
+                const p = params[0];
+                return '<div class="font-extrabold mb-1.5 text-base text-orange-400 border-b border-slate-600 pb-1.5">' + p.name + '</div>' + 
+                       '<div class="font-mono text-white text-base mt-2">' + formatNumber(p.value) + ' ton</div>';
+            }
+        },
+        grid: { left: '5%', right: '5%', bottom: '22%', top: '15%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: missingData.map(i => i.name),
+            axisLabel: { color: '#94a3b8', interval: 0, rotate: 35, fontWeight: '600', fontSize: 12 },
+            axisLine: { lineStyle: { color: '#475569', width: 2 } },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Toneladas Producidas',
+            nameTextStyle: { color: '#f97316', fontWeight: 'bold', fontSize: 13, align: 'left', padding: [0, 0, 10, -10] },
+            axisLabel: { color: '#94a3b8', fontWeight: 'bold', fontSize: 13, formatter: (val) => formatNumber(val) },
+            splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
+        },
+        series: [
+            {
+                type: 'bar',
+                data: missingData.map(i => ({ value: i.value, itemStyle: { color: '#f97316', borderRadius: [4, 4, 0, 0] } })),
+                label: {
+                    show: true, position: 'top', color: '#f8fafc', fontSize: 11, fontWeight: 'bold', rotate: 45, horizontalAlign: 'left', verticalAlign: 'middle', distance: 10,
+                    formatter: (p) => formatNumber(p.value)
+                }
+            }
+        ]
+    };
+    prodNationalChart.clear();
+    prodNationalChart.setOption(option);
+}
+
 prodNationalChart.on('click', function(params) {
-    if (isProdNationalMain && params.name === 'Producción 18 Estados (Dataset)') {
-        renderProdDrilldown();
+    if (isProdNationalMain) {
+        if (params.name === 'Producción 18 Estados (Dataset)') {
+            renderProdDrilldown();
+        } else if (params.name === 'Faltante (14 Estados Restantes)') {
+            const totalProdDataset = data.reduce((sum, item) => sum + item.produccion, 0);
+            const totalProdNacional = 27228242;
+            const prodFaltante = totalProdNacional - totalProdDataset;
+            renderMissingStatesDrilldown(prodFaltante);
+        }
     }
 });
 btnProdBack.addEventListener('click', renderProdNationalChart);
