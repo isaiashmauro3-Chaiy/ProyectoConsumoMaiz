@@ -19,7 +19,9 @@ const btnProdBack = document.getElementById('btn-prod-back');
 const prodNationalDesc = document.getElementById('prod-national-desc');
 
 let isProdNationalMain = true;
-
+let isConsumoNationalMain = true;
+const btnConsumoBack = document.getElementById('btn-consumo-back');
+const consumoNationalDesc = document.getElementById('consumo-national-desc');
 // Utilities
 const formatNumber = (num) => new Intl.NumberFormat('es-MX', { maximumFractionDigits: 2 }).format(num);
 const convertToK = (val) => val / 1000;
@@ -387,6 +389,10 @@ function renderProdIntervalChart() {
 
 // 5. Gráfica Comparativa Nacional
 function renderNationalChart() {
+    isConsumoNationalMain = true;
+    btnConsumoBack.classList.add('hidden');
+    consumoNationalDesc.innerHTML = 'Comparativa directa del <b>Consumo Total de los 18 Estados (Dataset)</b> contra la Demanda Nacional (Promedio 45.8 Millones de Toneladas). La diferencia agrupa los 14 estados restantes.\n<br><b>✨ ¡Haz clic en las barras (Dataset o Déficit) para desglosar sus estados interactivos!</b>';
+
     const totalDatasetConsumo = data.reduce((sum, item) => sum + item.consumoTotal, 0);
     // Consumo Promedio de Mexico = 45.8 millones
     const totalNacionalInternet = 45800000;
@@ -400,14 +406,15 @@ function renderNationalChart() {
             backgroundColor: 'rgba(15, 23, 42, 0.95)',
             borderColor: '#334155', borderWidth: 1, padding: [14, 18],
             formatter: function(params) {
-                let html = '<div class="font-extrabold mb-2 text-lg text-purple-400 border-b border-slate-600 pb-2">Desglose de Totales</div>';
-                params.forEach(p => {
-                    html += '<div class="flex justify-between items-center mt-2 mb-1">';
-                    html += '<span class="text-sm font-semibold text-slate-300 mr-8">' + p.marker + ' ' + p.name + ':</span>';
-                    html += '<span class="font-mono font-bold text-white">' + formatNumber(p.value) + ' ton</span>';
-                    html += '</div>';
-                });
-                return html;
+                const p = params[0];
+                let extra = '';
+                if (p.name === 'Consumo 18 Estados (Dataset)') {
+                    extra = '<div class="text-xs text-purple-300 mt-3 font-bold">👉 Haz clic para desglosar consumo por estado</div>';
+                } else if (p.name === 'Déficit (Resto Estados + Importación)') {
+                    extra = '<div class="text-xs text-orange-300 mt-3 font-bold animate-pulse">👉 Haz clic para desglose demográfico estimado</div>';
+                }
+                return '<div class="font-extrabold mb-1.5 text-base border-b border-slate-600 pb-2" style="color: ' + p.color + ';">' + p.name + '</div>' + 
+                       '<div class="font-mono text-white text-lg mt-2">' + formatNumber(p.value) + ' ton</div>' + extra;
             }
         },
         grid: { left: '10%', right: '10%', bottom: '15%', top: '15%', containLabel: true },
@@ -442,6 +449,126 @@ function renderNationalChart() {
             }
         ]
     };
+    nationalChart.setOption(option);
+}
+
+function renderConsumoDrilldown() {
+    isConsumoNationalMain = false;
+    btnConsumoBack.classList.remove('hidden');
+    consumoNationalDesc.innerHTML = 'Desglose interactivo del Consumo Real de Maíz por cada uno de los 18 estados de tu Dataset (Ordenado de Mayor a Menor).';
+
+    const sortedData = [...data].sort((a, b) => b.consumoTotal - a.consumoTotal);
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#334155', borderWidth: 1, padding: [10, 14],
+            formatter: function(params) {
+                const p = params[0];
+                return '<div class="font-extrabold mb-1.5 text-base text-purple-400 border-b border-slate-600 pb-1.5">' + p.name + '</div>' + 
+                       '<div class="font-mono text-white text-base mt-2">' + formatNumber(p.value) + ' ton</div>';
+            }
+        },
+        grid: { left: '5%', right: '5%', bottom: '22%', top: '15%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: sortedData.map(i => i.estado),
+            axisLabel: { color: '#94a3b8', interval: 0, rotate: 35, fontWeight: '600', fontSize: 12 },
+            axisLine: { lineStyle: { color: '#475569', width: 2 } },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Toneladas Consumidas',
+            nameTextStyle: { color: '#c084fc', fontWeight: 'bold', fontSize: 13, align: 'left', padding: [0, 0, 10, -10] },
+            axisLabel: { color: '#94a3b8', fontWeight: 'bold', fontSize: 13, formatter: (val) => formatNumber(val) },
+            splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
+        },
+        series: [
+            {
+                type: 'bar',
+                data: sortedData.map(i => ({ value: i.consumoTotal, itemStyle: { color: '#c084fc', borderRadius: [4, 4, 0, 0] } })),
+                label: {
+                    show: true, position: 'top', color: '#f8fafc', fontSize: 11, fontWeight: 'bold', rotate: 45, horizontalAlign: 'left', verticalAlign: 'middle', distance: 10,
+                    formatter: (p) => formatNumber(p.value)
+                }
+            }
+        ]
+    };
+    nationalChart.clear();
+    nationalChart.setOption(option);
+}
+
+function renderMissingConsumoDrilldown(totalFaltante) {
+    isConsumoNationalMain = false;
+    btnConsumoBack.classList.remove('hidden');
+    consumoNationalDesc.innerHTML = 'Desglose interactivo estimado de qué estados absorbieron el Consumo Restante (Déficit + Importación), calculado proporcionalmente según la densidad poblacional de cada estado faltante (INEGI 2020).';
+
+    const missingConsumoWeights = [
+        { estado: 'Ciudad de México', pct: 0.23 },
+        { estado: 'Guanajuato', pct: 0.15 },
+        { estado: 'Tamaulipas', pct: 0.09 },
+        { estado: 'Coahuila', pct: 0.08 },
+        { estado: 'Sonora', pct: 0.07 },
+        { estado: 'San Luis Potosí', pct: 0.07 },
+        { estado: 'Tabasco', pct: 0.06 },
+        { estado: 'Yucatán', pct: 0.055 },
+        { estado: 'Morelos', pct: 0.045 },
+        { estado: 'Quintana Roo', pct: 0.045 },
+        { estado: 'Aguascalientes', pct: 0.035 },
+        { estado: 'Tlaxcala', pct: 0.03 },
+        { estado: 'Campeche', pct: 0.02 },
+        { estado: 'Colima', pct: 0.02 }
+    ];
+
+    const missingData = missingConsumoWeights.map(i => ({
+        name: i.estado,
+        value: totalFaltante * i.pct
+    }));
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#334155', borderWidth: 1, padding: [10, 14],
+            formatter: function(params) {
+                const p = params[0];
+                return '<div class="font-extrabold mb-1.5 text-base text-orange-400 border-b border-slate-600 pb-1.5">' + p.name + '</div>' + 
+                       '<div class="font-mono text-white text-base mt-2">' + formatNumber(p.value) + ' ton (Estimación)</div>';
+            }
+        },
+        grid: { left: '5%', right: '5%', bottom: '22%', top: '15%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: missingData.map(i => i.name),
+            axisLabel: { color: '#94a3b8', interval: 0, rotate: 35, fontWeight: '600', fontSize: 12 },
+            axisLine: { lineStyle: { color: '#475569', width: 2 } },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Ton. Consumidas (Estimadas)',
+            nameTextStyle: { color: '#f97316', fontWeight: 'bold', fontSize: 13, align: 'left', padding: [0, 0, 10, -10] },
+            axisLabel: { color: '#94a3b8', fontWeight: 'bold', fontSize: 13, formatter: (val) => formatNumber(val) },
+            splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
+        },
+        series: [
+            {
+                type: 'bar',
+                data: missingData.map(i => ({ value: i.value, itemStyle: { color: '#f97316', borderRadius: [4, 4, 0, 0] } })),
+                label: {
+                    show: true, position: 'top', color: '#f8fafc', fontSize: 11, fontWeight: 'bold', rotate: 45, horizontalAlign: 'left', verticalAlign: 'middle', distance: 10,
+                    formatter: (p) => formatNumber(p.value)
+                }
+            }
+        ]
+    };
+    nationalChart.clear();
     nationalChart.setOption(option);
 }
 
@@ -618,6 +745,20 @@ function renderMissingStatesDrilldown() {
     prodNationalChart.clear();
     prodNationalChart.setOption(option);
 }
+
+// Lógica de Eventos Clic y Retorno para National Charts
+nationalChart.on('click', function(params) {
+    if (isConsumoNationalMain) {
+        if (params.name === 'Consumo 18 Estados (Dataset)') {
+            renderConsumoDrilldown();
+        } else if (params.name === 'Déficit (Resto Estados + Importación)') {
+            const totalDatasetConsumo = data.reduce((sum, item) => sum + item.consumoTotal, 0);
+            const prodFaltante = 45800000 - totalDatasetConsumo;
+            renderMissingConsumoDrilldown(prodFaltante);
+        }
+    }
+});
+btnConsumoBack.addEventListener('click', renderNationalChart);
 
 prodNationalChart.on('click', function(params) {
     if (isProdNationalMain) {

@@ -155,10 +155,15 @@
         <!-- Cuarta Gráfica: Comparativa Nacional de Consumo -->
         <div
             class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-4">
-            <h2 class="text-xl sm:text-2xl font-bold text-purple-400 mb-2">Análisis de Consumo Nacional: Dataset vs Realidad (Datos Crudos)</h2>
-            <p class="text-slate-300 text-sm mb-4 leading-relaxed">
-                Comparativa directa del <b>Consumo Total de los 18 Estados</b> registrados en el Dataset actual contra la <b>Demanda/Consumo Nacional Promedio de México</b> (aprox. 45 Millones de Toneladas). 
-                <br>La diferencia refleja el volumen consumido por los restantes 14 estados del país más el volumen cubierto por importación.
+            <div class="flex justify-between items-start mb-2">
+                <h2 class="text-xl sm:text-2xl font-bold text-purple-400">Análisis de Consumo Nacional: Dataset vs Realidad</h2>
+                <button id="btn-consumo-back" class="hidden bg-purple-600 hover:bg-purple-500 text-white font-bold py-1.5 px-4 rounded shadow-lg transition-all text-sm flex items-center gap-2">
+                    ⬅️ Regresar a Totales
+                </button>
+            </div>
+            <p class="text-slate-300 text-sm mb-4 leading-relaxed" id="consumo-national-desc">
+                Comparativa directa del <b>Consumo Total de los 18 Estados (Dataset)</b> contra la Demanda Nacional (Promedio 45.8 Millones de Toneladas). La diferencia agrupa los 14 estados restantes.
+                <br><b>✨ ¡Haz clic en las barras (Dataset o Déficit) para desglosar sus estados interactivos!</b>
             </p>
             <div id="national-chart-container" class="w-full h-full flex-grow min-h-[300px]"></div>
         </div>
