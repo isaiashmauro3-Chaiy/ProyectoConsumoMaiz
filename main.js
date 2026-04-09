@@ -4,12 +4,14 @@ const prodIntervalChartDom = document.getElementById('prod-interval-chart-contai
 
 const nationalChartDom = document.getElementById('national-chart-container');
 const prodNationalChartDom = document.getElementById('prod-national-chart-container');
+const precipIntervalChartDom = document.getElementById('precip-interval-chart-container');
 
 const myChart = echarts.init(chartDom, 'dark');
 const intervalChart = echarts.init(intervalChartDom, 'dark');
 const prodIntervalChart = echarts.init(prodIntervalChartDom, 'dark');
 const nationalChart = echarts.init(nationalChartDom, 'dark');
 const prodNationalChart = echarts.init(prodNationalChartDom, 'dark');
+const precipIntervalChart = echarts.init(precipIntervalChartDom, 'dark');
 
 const stateSelector = document.getElementById('state-selector');
 const btnBack = document.getElementById('btn-back');
@@ -33,25 +35,25 @@ let states = [];
 let mainOption = {};
 
 // 1. Cargar datos incrustados directamente para evitar errores de CORS al abrir localmente
-const rawCsvData = `Entidad,Sembrada (ha) [Oct18-Sep19],Cosechada (ha) [Oct18-Sep19],Siniestrada (ha) [Oct18-Sep19],Produccion (ton) [Oct18-Sep19],Rendimiento (ton/ha),Cultivo seleccionado,Consumo (I+J+K+L),Semilla para siembra [Oct18-Sep19],Para consumo de la familia [Oct18-Sep19],Para consumo de los animales [Oct18-Sep19],Para venta (Total),Para venta (Exportacion),Consumo total (H+M),,
-Baja California,719.41,719.41,0,8679.05,12.06,Maiz de Grano,6286.435,0.029,0.962,5293.885,991.56,0,6286.435,,
-Baja California Sur,6800.75,6800.75,0,61843.93,9.09,Maiz de Grano,37869.15,0.095,1.667,5312.262,32555.126,0,37869.15,,
-Chiapas,689822.29,"672,812.27",17010.02,1255419.51,1.87,Maiz de Grano,1084385.734,5185.905,133754.581,64331.839,881113.408,0,1084385.734,,
-Chihuahua,214769.12,"214,493.12",276,1417389.66,6.61,Maiz de Grano,2582406.526,2152.877867,1094.194879,81409.42998,2497750.023,2889.1723,2585295.698,,
-Durango,121350.21,118266.21,3084,298842.99,2.53,Maiz de Grano,298564.161,1245.293,4293.042,33735.47,259290.357,18.789,298582.95,,
-Guerrero,491301.24,453209.95,38091.29,"1,292,294.44",2.85,Maiz de Grano,731011.751,4355.955,178633.473,190137.486,357884.836,0,731011.751,,
-Hidalgo,231585.21,194046.55,37538.66,602021.35,3.1,Maiz de Grano,601215.282,4409.505,84897.932,74568.067,437339.778,0,601215.282,,
-Jalisco,589681.06,"589681.06	",0,3818364.89,6.48,Maiz de Grano,3408198.105,540.644,13013.482,364068.823,3030575.156,0,3408198.105,,
-Mexico,475809.03,469318.66,6490.37,1865010.36,3.97,Maiz de Grano,621496.911,13834.996,197055.764,139098.012,271508.139,0,621496.911,,
-Michoacan,441388.01,416775.01,24613,1945027.31,4.67,Maiz de Grano,2262398.628,11305.705,79855.539,189732.606,1981504.778,3186.737,2265585.365,,
-Nayarit,26003,25979,24,111199.26,4.28,Maiz de Grano,381922.645,190.536,5132.092,28171.378,348428.639,1656.818,383579.463,,
-Nuevo Leon,63332.84,63072.84,260,64811.82,1.03,Maiz de Grano,55973.436,2905.492,9901.355,19434.339,23732.25,0,55973.436,,
-Oaxaca,497732.21,463265.71,34466.5,"633,798.37",1.37,Maiz de Grano,353707.314,9005.615,158804.719,36709.604,149187.376,1138.351,354845.665,,
-Puebla,532963.63,517820.96,15142.67,893554.07,1.98,Maiz de Grano,696360.1,11177.268,182114.586,66365.842,436702.405,0,696360.1,,
-Queretaro,89997.76,67329.92,22667.84,1026623.8,3.3,Maiz de Grano,334367.666,1697.793,14022.222,34700.7,283946.95,0,334367.666,,
-Sinaloa,557279.25,556430.84,848.41,6440204.9,11.57,Maiz de Grano,7484681.071,1303.304,11957.818,29729.967,7441689.982,4718.4,7489399.471,,
-Veracruz,574332.8,510627.49,63705.31,1113138.53,2.18,Maiz de Grano,578869.96,5348.178,116947.91,89414.694,367159.178,0,578869.96,,
-Zacatecas,142877,94859.4,48017.6,319911.17,3.37,Maiz de Grano,287027.695,15021.178,11025.695,66423.013,194557.81,0,287027.695,,`;
+const rawCsvData = `Entidad,Sembrada (ha) [Oct18-Sep19],Cosechada (ha) [Oct18-Sep19],Siniestrada (ha) [Oct18-Sep19],Produccion (ton) [Oct18-Sep19],Rendimiento (ton/ha),Cultivo seleccionado,Consumo (I+J+K+L),Semilla para siembra [Oct18-Sep19],Para consumo de la familia [Oct18-Sep19],Para consumo de los animales [Oct18-Sep19],Para venta (Total),Para venta (Exportacion),Consumo total (H+M),total de precipitacion mm
+Baja California,719.41,719.41,0,8679.05,12.06,Maiz de Grano,6286.435,0.029,0.962,5293.885,991.56,0,6286.435,184.9
+Baja California Sur,6800.75,6800.75,0,61843.93,9.09,Maiz de Grano,37869.15,0.095,1.667,5312.262,32555.126,0,37869.15,115.7
+Chiapas,689822.29,672812.27,17010.02,1255419.51,1.87,Maiz de Grano,1084385.734,5185.905,133754.581,64331.839,881113.408,0,1084385.734,1642.6
+Chihuahua,214769.12,"214,493.12",276,1417389.66,6.61,Maiz de Grano,2582406.526,2152.877867,1094.194879,81409.42998,2497750.023,2889.1723,2585295.698,402.6
+Durango,121350.21,118266.21,3084,298842.99,2.53,Maiz de Grano,298564.161,1245.293,4293.042,33735.47,259290.357,18.789,298582.95,412.5
+Guerrero,491301.24,453209.95,38091.29,"1,292,294.44",2.85,Maiz de Grano,731011.751,4355.955,178633.473,190137.486,357884.836,0,731011.751,1133.7
+Hidalgo,231585.21,194046.55,37538.66,602021.35,3.1,Maiz de Grano,601215.282,4409.505,84897.932,74568.067,437339.778,0,601215.282,428.1
+Jalisco,589681.06,589681.06,0,3818364.89,6.48,Maiz de Grano,3408198.105,540.644,13013.482,364068.823,3030575.156,0,3408198.105,962.4
+Mexico,475809.03,469318.66,6490.37,1865010.36,3.97,Maiz de Grano,621496.911,13834.996,197055.764,139098.012,271508.139,0,621496.911,533.9
+Michoacan,441388.01,416775.01,24613,1945027.31,4.67,Maiz de Grano,2262398.628,11305.705,79855.539,189732.606,1981504.778,3186.737,2265585.365,771
+Nayarit,26003,25979,24,111199.26,4.28,Maiz de Grano,381922.645,190.536,5132.092,28171.378,348428.639,1656.818,383579.463,624.1
+Nuevo Leon,63332.84,63072.84,260,64811.82,1.03,Maiz de Grano,55973.436,2905.492,9901.355,19434.339,23732.25,0,55973.436,893.6
+Oaxaca,497732.21,463265.71,34466.5,"633,798.37",1.37,Maiz de Grano,353707.314,9005.615,158804.719,36709.604,149187.376,1138.351,354845.665,907.6
+Puebla,532963.63,517820.96,15142.67,893554.07,1.98,Maiz de Grano,696360.1,11177.268,182114.586,66365.842,436702.405,0,696360.1,61.9
+Queretaro,89997.76,67329.92,22667.84,1026623.8,3.3,Maiz de Grano,334367.666,1697.793,14022.222,34700.7,283946.95,0,334367.666,181.4
+Sinaloa,557279.25,556430.84,848.41,6440204.9,11.57,Maiz de Grano,7484681.071,1303.304,11957.818,29729.967,7441689.982,4718.4,7489399.471,181.4
+Veracruz,574332.8,510627.49,63705.31,1113138.53,2.18,Maiz de Grano,578869.96,5348.178,116947.91,89414.694,367159.178,0,578869.96,47.5
+Zacatecas,142877,94859.4,48017.6,319911.17,3.37,Maiz de Grano,287027.695,15021.178,11025.695,66423.013,194557.81,0,287027.695,53.9`;
 
 parseAndInitData(rawCsvData);
 
@@ -91,7 +93,8 @@ function parseAndInitData(csvText) {
             animales: parseFloat(cols[10]) || 0,
             ventaTotal: parseFloat(cols[11]) || 0,
             ventaExp: parseFloat(cols[12]) || 0,
-            consumoTotal: parseFloat(cols[13]) || 0
+            consumoTotal: parseFloat(cols[13]) || 0,
+            precipitacion: parseFloat(cols[14]) || 0
         });
     }
 
@@ -111,6 +114,7 @@ function parseAndInitData(csvText) {
     renderProdIntervalChart();
     renderNationalChart();
     renderProdNationalChart();
+    renderPrecipitationIntervalChart();
 }
 
 // 3. Histograma de Intervalos por Eficiencia (Rendimiento)
@@ -799,7 +803,7 @@ function initOptions() {
                     if (param.seriesName !== 'Producción Total' && !param.seriesName.includes('Hectáreas ')) {
                         sumConsumo += rawValue;
                     }
-                    const unit = param.seriesName.includes('Hectáreas ') ? ' ha.' : ' ton.';
+                    const unit = param.seriesName.includes('Hectáreas ') ? ' ha.' : (param.seriesName.includes('Precipitación') ? ' mm.' : ' ton.');
                     tooltipHtml += `<div class="flex justify-between items-center my-0.5 gap-6">
                                         <span class="flex items-center text-sm">${param.marker} ${param.seriesName}</span>
                                         <span class="font-mono font-semibold text-sm">${formatNumber(rawValue)}${unit}</span>
@@ -812,7 +816,7 @@ function initOptions() {
             }
         },
         legend: {
-            data: ['Hectáreas Sembradas', 'Hectáreas Cosechadas', 'Hectáreas Siniestradas', 'Hectáreas Fugadas (No Cosechadas)', 'Producción Total', 'Semilla para siembra', 'Para consumo de la familia', 'Para consumo de animales', 'Para venta (Total)', 'Para venta (Exportacion)'],
+            data: ['Hectáreas Sembradas', 'Hectáreas Cosechadas', 'Hectáreas Siniestradas', 'Hectáreas Fugadas (No Cosechadas)', 'Producción Total', 'Semilla para siembra', 'Para consumo de la familia', 'Para consumo de animales', 'Para venta (Total)', 'Para venta (Exportacion)', 'Precipitación (Línea)', 'Precipitación (Barra)'],
             textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
             top: 0, itemGap: 10
         },
@@ -851,6 +855,15 @@ function initOptions() {
                 nameTextStyle: { color: '#3b82f6', fontWeight: 'bold', fontSize: 12, align: 'right' },
                 axisLabel: { color: '#e2e8f0', fontWeight: '600', formatter: (value) => formatNumber(value) },
                 splitLine: { show: false }
+            },
+            {
+                type: 'value',
+                name: 'Clima\n(mm)',
+                nameLocation: 'end',
+                offset: 60,
+                nameTextStyle: { color: '#60a5fa', fontWeight: 'bold', fontSize: 12, align: 'right' },
+                axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: '{value} mm' },
+                splitLine: { show: false }
             }
         ],
         series: [
@@ -863,7 +876,9 @@ function initOptions() {
             { name: 'Para consumo de la familia', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.familia), rawValue: i.familia })), itemStyle: { color: '#f87171' } },
             { name: 'Para consumo de animales', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.animales), rawValue: i.animales })), itemStyle: { color: '#60a5fa' } },
             { name: 'Para venta (Total)', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.ventaTotal), rawValue: i.ventaTotal })), itemStyle: { color: '#34d399' } },
-            { name: 'Para venta (Exportacion)', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.ventaExp), rawValue: i.ventaExp })), itemStyle: { color: '#c084fc', borderRadius: [2, 2, 0, 0] } }
+            { name: 'Para venta (Exportacion)', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.ventaExp), rawValue: i.ventaExp })), itemStyle: { color: '#c084fc', borderRadius: [2, 2, 0, 0] } },
+            { name: 'Precipitación (Línea)', type: 'line', yAxisIndex: 2, data: data.map(i => ({ value: i.precipitacion, rawValue: i.precipitacion })), itemStyle: { color: '#00f2ff' }, symbolSize: 6, smooth: true, lineStyle: { width: 3, shadowBlur: 10, shadowColor: 'rgba(0, 242, 255, 0.5)' }, z: 15 },
+            { name: 'Precipitación (Barra)', type: 'bar', yAxisIndex: 2, data: data.map(i => ({ value: i.precipitacion, rawValue: i.precipitacion })), itemStyle: { color: 'rgba(0, 242, 255, 0.2)', borderColor: '#00f2ff', borderWidth: 1 }, z: 0 }
         ]
     };
 }
@@ -875,7 +890,7 @@ function renderMainChart() {
     stateSelector.value = "";
 
     titleSpan.innerHTML = 'por Entidad';
-    chartDesc.innerHTML = 'Comparativa de Producción vs Consumo y Métrica Terrestre General. Usa el menú contextual "Guía Rápida" arriba para ver los detalles de las líneas.';
+    chartDesc.innerHTML = 'Comparativa de Producción vs Consumo, Métrica Terrestre y <b class="text-cyan-400">Precipitación</b>. He activado la lluvia de dos formas (Línea y Barra) para que decidas cuál prefieres manteniendo la otra oculta o ambas visibles.';
 
     myChart.clear();
     myChart.setOption(mainOption, true);
@@ -910,7 +925,7 @@ function renderStateChart(stateName) {
             },
             formatter: function (params) {
                 const p = params[0];
-                const unit = p.name.includes('(ha)') ? ' ha.' : ' ton.';
+                const unit = p.name.includes('(ha)') ? ' ha.' : (p.name.includes('(mm)') ? ' mm.' : ' ton.');
                 return `<div class="font-extrabold mb-1.5 text-base text-emerald-400 border-b border-slate-600 pb-1.5">${p.name.replace('\n', ' ')}</div>
                         <div class="font-mono text-sm font-semibold mt-1.5">${formatNumber(p.data.rawValue)}${unit}</div>`;
             }
@@ -918,7 +933,7 @@ function renderStateChart(stateName) {
         grid: { left: '2%', right: '4%', bottom: '10%', top: '25%', containLabel: true },
         xAxis: {
             type: 'category',
-            data: ['Sembrada\n(ha)', 'Cosechada\n(ha)', 'Siniestrada\n(ha)', 'Fugada\n(ha)', 'Producción', 'Semilla', 'Familia', 'Animales', 'Venta\n(Total)', 'Venta\n(Export)'],
+            data: ['Sembrada\n(ha)', 'Cosechada\n(ha)', 'Siniestrada\n(ha)', 'Fugada\n(ha)', 'Producción', 'Semilla', 'Familia', 'Animales', 'Venta\n(Total)', 'Venta\n(Export)', 'Lluvia\n(mm)'],
             axisLabel: { color: '#e2e8f0', fontSize: 13, fontWeight: '600', interval: 0, rotate: 15 },
             axisLine: { lineStyle: { color: '#475569', width: 2 } }
         },
@@ -944,7 +959,8 @@ function renderStateChart(stateName) {
                 { value: stateData.familia, rawValue: stateData.familia, itemStyle: { color: '#f87171', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.animales, rawValue: stateData.animales, itemStyle: { color: '#60a5fa', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.ventaTotal, rawValue: stateData.ventaTotal, itemStyle: { color: '#34d399', borderRadius: [4, 4, 0, 0] } },
-                { value: stateData.ventaExp, rawValue: stateData.ventaExp, itemStyle: { color: '#c084fc', borderRadius: [4, 4, 0, 0] } }
+                { value: stateData.ventaExp, rawValue: stateData.ventaExp, itemStyle: { color: '#c084fc', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.precipitacion, rawValue: stateData.precipitacion, itemStyle: { color: '#00f2ff', borderRadius: [4, 4, 0, 0] } }
             ],
             label: {
                 show: true,
@@ -1004,6 +1020,7 @@ window.addEventListener('resize', () => {
         prodIntervalChart.resize();
         nationalChart.resize();
         prodNationalChart.resize();
+        precipIntervalChart.resize();
     }, 150);
 });
 
@@ -1117,4 +1134,112 @@ document.getElementById('btn-dl-prod-national').addEventListener('click', () => 
     let suffix = isProdNationalMain ? 'Totales' : 'Desglose_Detalle';
     downloadCSV(`Desempeno_Produccion_Nacional_${suffix}.csv`, csv);
 });
+
+document.getElementById('btn-dl-precip-interval').addEventListener('click', () => {
+    let csv = 'Rango de Precipitacion (mm),Cantidad de Estados,Estados Integrantes,Promedio de Rendimiento (ton/ha)\n';
+    
+    const buckets = [
+        { label: '0-300 mm (Arido/Seco)', min: 0, max: 300, states: [], sumRend: 0 },
+        { label: '300-600 mm (Semi-seco)', min: 301, max: 600, states: [], sumRend: 0 },
+        { label: '600-900 mm (Templado/Humedo)', min: 601, max: 900, states: [], sumRend: 0 },
+        { label: '900+ mm (Tropical/Abundante)', min: 901, max: 9999, states: [], sumRend: 0 }
+    ];
+
+    data.forEach(item => {
+        const p = item.precipitacion;
+        for (let b of buckets) {
+            if (p >= b.min && p <= b.max) {
+                b.states.push(item.estado);
+                b.sumRend += item.rendimiento;
+                break;
+            }
+        }
+    });
+
+    buckets.forEach(b => {
+        const avgRend = b.states.length > 0 ? (b.sumRend / b.states.length).toFixed(2) : 0;
+        csv += `"${b.label}",${b.states.length},"${b.states.join(', ')}",${avgRend}\n`;
+    });
+    
+    downloadCSV('Analisis_Intervalos_Precipitacion.csv', csv);
+});
+
+function renderPrecipitationIntervalChart() {
+    const buckets = [
+        { label: '0-300 mm\n(Arido/Seco)', min: 0, max: 300, states: [], color: '#f87171', sumRend: 0 },
+        { label: '300-600 mm\n(Semi-seco)', min: 301, max: 600, states: [], color: '#fbbf24', sumRend: 0 },
+        { label: '600-900 mm\n(Templado/Humedo)', min: 601, max: 900, states: [], color: '#34d399', sumRend: 0 },
+        { label: '900+ mm\n(Tropical/Abundante)', min: 901, max: 9999, states: [], color: '#00f2ff', sumRend: 0 }
+    ];
+
+    data.forEach(item => {
+        const p = item.precipitacion;
+        for (let b of buckets) {
+            if (p >= b.min && p <= b.max) {
+                b.states.push(item.estado);
+                b.sumRend += item.rendimiento;
+                break;
+            }
+        }
+    });
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            formatter: function(params) {
+                const b = buckets[params[0].dataIndex];
+                return `<div class="font-bold text-cyan-400 mb-1">${b.label.replace('\n', ' ')}</div>
+                        <div class="text-xs text-slate-300 mb-1">Estados (${b.states.length}): ${b.states.join(', ')}</div>
+                        <div class="flex justify-between gap-4">
+                            <span>Prom. Rendimiento:</span>
+                            <span class="font-mono font-bold text-emerald-400">${(b.sumRend / (b.states.length || 1)).toFixed(2)} ton/ha</span>
+                        </div>`;
+            }
+        },
+        grid: { top: '15%', bottom: '15%', left: '5%', right: '5%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: buckets.map(b => b.label),
+            axisLabel: { color: '#94a3b8', fontSize: 11, fontWeight: '600' }
+        },
+        yAxis: [
+            {
+                type: 'value',
+                name: 'Cantidad de Estados',
+                axisLabel: { color: '#94a3b8' },
+                splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)' } }
+            },
+            {
+                type: 'value',
+                name: 'Rendimiento Promedio',
+                axisLabel: { color: '#10b981', formatter: '{value} t/h' },
+                splitLine: { show: false }
+            }
+        ],
+        series: [
+            {
+                name: 'Estados',
+                type: 'bar',
+                data: buckets.map(b => ({
+                    value: b.states.length,
+                    itemStyle: { color: b.color, borderRadius: [4, 4, 0, 0] }
+                })),
+                label: { show: true, position: 'top', color: '#fff' }
+            },
+            {
+                name: 'Rendimiento Promedio',
+                type: 'line',
+                yAxisIndex: 1,
+                smooth: true,
+                data: buckets.map(b => (b.states.length > 0 ? (b.sumRend / b.states.length).toFixed(2) : 0)),
+                itemStyle: { color: '#10b981' },
+                lineStyle: { width: 3 }
+            }
+        ]
+    };
+
+    precipIntervalChart.setOption(option);
+}
 

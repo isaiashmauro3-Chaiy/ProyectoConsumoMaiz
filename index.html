@@ -205,6 +205,22 @@
             <div id="prod-national-chart-container" class="w-full h-full flex-grow min-h-[350px]"></div>
         </div>
 
+        <!-- Sexta Gráfica: Intervalos por Precipitación -->
+        <div
+            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-6">
+            <button id="btn-dl-precip-interval" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500" title="Descargar CSV">
+                <svg class="w-5 h-5 text-cyan-400 group-hover:text-cyan-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="text-xs font-bold hidden sm:block">CSV</span>
+            </button>
+            <h2 class="text-xl sm:text-2xl font-bold text-cyan-400 mb-2 pr-20">Análisis Climático: Intervalos de Precipitación Anual</h2>
+            <p class="text-slate-300 text-sm mb-4 leading-relaxed">
+                Clasificación de los estados según su nivel de lluvia acumulada (mm). 
+                <br/>
+                Permite observar si existe una correlación visual entre las zonas de alta precipitación (Tropical/Húmedo) y los rendimientos por hectárea más elevados.
+            </p>
+            <div id="precip-interval-chart-container" class="w-full h-full flex-grow min-h-[300px]"></div>
+        </div>
+
         <!-- Evidencias y Fuentes -->
         <div class="bg-indigo-950/40 backdrop-blur-sm rounded-xl shadow-inner border border-indigo-500/30 p-5 w-full flex-shrink-0 relative flex flex-col mb-4 overflow-hidden">
             <h2 class="text-xl font-bold text-indigo-300 mb-4 flex items-center gap-2">
