@@ -391,7 +391,7 @@ function renderProdIntervalChart() {
 function renderNationalChart() {
     isConsumoNationalMain = true;
     btnConsumoBack.classList.add('hidden');
-    consumoNationalDesc.innerHTML = 'Comparativa directa del <b>Consumo Total de los 18 Estados (Dataset)</b> contra la Demanda Nacional (Promedio 45.8 Millones de Toneladas). La diferencia agrupa los 14 estados restantes.\n<br><b>✨ ¡Haz clic en las barras (Dataset o Déficit) para desglosar sus estados interactivos!</b>';
+    consumoNationalDesc.innerHTML = 'Comparativa directa del <b>Consumo Total de los 18 Estados (Dataset)</b> contra la Demanda Nacional (Promedio 45.8 Millones de Toneladas). La diferencia agrupa los 14 estados restantes.\n<br><span class="text-amber-400 font-semibold">⚠️ Nota: Los datos de los 14 estados faltantes fueron investigados en internet y promediados (no provienen del dataset original).</span>\n<br><b>✨ ¡Haz clic en las barras (Dataset o Déficit) para desglosar sus estados interactivos!</b>';
 
     const totalDatasetConsumo = data.reduce((sum, item) => sum + item.consumoTotal, 0);
     // Consumo Promedio de Mexico = 45.8 millones
@@ -1006,3 +1006,115 @@ window.addEventListener('resize', () => {
         prodNationalChart.resize();
     }, 150);
 });
+
+// ==========================================
+// EXPORTACIÓN A CSV
+// ==========================================
+
+function downloadCSV(filename, csvContent) {
+    // Añadimos BOM para que Excel respete los acentos/ñ en español
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+document.getElementById('btn-dl-main').addEventListener('click', () => {
+    // La Gráfica 1 descarga la matriz unificada exacta de los 18 estados presentes en la raw data
+    downloadCSV('Maiz_Dataset_Unificado_Principal.csv', rawCsvData);
+});
+
+document.getElementById('btn-dl-interval').addEventListener('click', () => {
+    // Reconstruimos la tabla que estamos mostrando visualmente
+    let csv = 'Rango de Eficiencia (Ton/Ha),Cantidad de Estados,Estados Integrantes,Volumen Produccion Agregada (Ton),Volumen Consumo Agregado (Ton)\n';
+    
+    const buckets = [
+        { label: '0 a 2.5 ton/ha (Eficiencia Baja)', min: 0, max: 2.500, states: [], sumProd: 0, sumConsumo: 0 },
+        { label: '2.5 a 5.0 ton/ha (Eficiencia Regular)', min: 2.501, max: 5.000, states: [], sumProd: 0, sumConsumo: 0 },
+        { label: '5.0 a 7.5 ton/ha (Eficiencia Buena)', min: 5.001, max: 7.500, states: [], sumProd: 0, sumConsumo: 0 },
+        { label: '7.5 a 10.0 ton/ha (Eficiencia Muy Buena)', min: 7.501, max: 10.000, states: [], sumProd: 0, sumConsumo: 0 },
+        { label: '+10.0 ton/ha (Nivel Exportacion)', min: 10.001, max: 99999, states: [], sumProd: 0, sumConsumo: 0 }
+    ];
+
+    data.forEach(item => {
+        const r = item.rendimiento;
+        for (let b of buckets) {
+            if (r >= b.min && r <= b.max) {
+                b.states.push(item.estado);
+                b.sumProd += item.produccion;
+                b.sumConsumo += item.consumoTotal;
+                break;
+            }
+        }
+    });
+
+    buckets.forEach(b => {
+        csv += `"${b.label}",${b.states.length},"${b.states.join(', ')}",${b.sumProd},${b.sumConsumo}\n`;
+    });
+    
+    downloadCSV('Analisis_Intervalos_Rendimiento.csv', csv);
+});
+
+document.getElementById('btn-dl-prod-interval').addEventListener('click', () => {
+    let csv = 'Categoria de Produccion,Cantidad de Estados,Estados Integrantes,Produccion Neta del Grupo (Ton),Porcentaje Participacion Mercado Nacional\n';
+    const totalNacional = data.reduce((sum, item) => sum + item.produccion, 0);
+
+    const buckets = [
+        { label: '0 a 200k ton (Produccion Marginal)', min: 0, max: 200000, states: [], sumProd: 0 },
+        { label: '200k a 500k ton (Productores Menores)', min: 200001, max: 500000, states: [], sumProd: 0 },
+        { label: '500k a 1M ton (Productores Medios)', min: 500001, max: 1000000, states: [], sumProd: 0 },
+        { label: '1M a 2M ton (Productores Mayores)', min: 1000001, max: 2000000, states: [], sumProd: 0 },
+        { label: '+ 2 Millones ton (Megaproductores)', min: 2000001, max: 99999999, states: [], sumProd: 0 }
+    ];
+
+    data.forEach(item => {
+        const p = item.produccion;
+        for (let b of buckets) {
+            if (p >= b.min && p <= b.max) {
+                b.states.push(item.estado);
+                b.sumProd += item.produccion;
+                break;
+            }
+        }
+    });
+
+    buckets.forEach(b => {
+        const pct = ((b.sumProd / totalNacional) * 100).toFixed(2) + '%';
+        csv += `"${b.label}",${b.states.length},"${b.states.join(', ')}",${b.sumProd},"${pct}"\n`;
+    });
+
+    downloadCSV('Segmentacion_Mercado_Produccion.csv', csv);
+});
+
+// Función genérica para extraer datos de la instancia de gráfica viva (Ideal para Drilldowns)
+function getEchartsDataToCSV(chartInstance, TitleHeader, ValueHeader) {
+    const option = chartInstance.getOption();
+    if (!option || !option.xAxis || !option.series) return '';
+    
+    const xData = option.xAxis[0].data;
+    const seriesData = option.series[0].data;
+
+    let csv = `${TitleHeader},${ValueHeader}\n`;
+    for (let i = 0; i < xData.length; i++) {
+        let val = (typeof seriesData[i] === 'object') ? seriesData[i].value : seriesData[i];
+        csv += `"${xData[i]}",${val}\n`;
+    }
+    return csv;
+}
+
+document.getElementById('btn-dl-national').addEventListener('click', () => {
+    const csv = getEchartsDataToCSV(nationalChart, 'Entidad o Categoria', 'Toneladas Consumidas');
+    let suffix = isConsumoNationalMain ? 'Totales' : 'Desglose_Detalle';
+    downloadCSV(`Comparativa_Consumo_Nacional_${suffix}.csv`, csv);
+});
+
+document.getElementById('btn-dl-prod-national').addEventListener('click', () => {
+    const csv = getEchartsDataToCSV(prodNationalChart, 'Entidad o Categoria', 'Toneladas Producidas');
+    let suffix = isProdNationalMain ? 'Totales' : 'Desglose_Detalle';
+    downloadCSV(`Desempeno_Produccion_Nacional_${suffix}.csv`, csv);
+});
+

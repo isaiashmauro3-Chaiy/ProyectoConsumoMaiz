@@ -123,13 +123,21 @@
         <!-- Primera Gráfica -->
         <div
             class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-2 sm:p-4 min-h-[350px] sm:min-h-[500px] h-auto md:h-[65vh] w-full flex-shrink-0 relative flex flex-col overflow-hidden">
+            <button id="btn-dl-main" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500" title="Descargar CSV">
+                <svg class="w-5 h-5 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="text-xs font-bold hidden sm:block">CSV</span>
+            </button>
             <div id="chart-container" class="w-full h-full flex-grow"></div>
         </div>
 
         <!-- Segunda Gráfica: Intervalos Analíticos -->
         <div
             class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mt-4 mb-4">
-            <h2 class="text-xl sm:text-2xl font-bold text-emerald-400 mb-2">Distribución de Estados por Rendimiento
+            <button id="btn-dl-interval" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500" title="Descargar CSV">
+                <svg class="w-5 h-5 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="text-xs font-bold hidden sm:block">CSV</span>
+            </button>
+            <h2 class="text-xl sm:text-2xl font-bold text-emerald-400 mb-2 pr-20">Distribución de Estados por Rendimiento
                 Agrícola (Ton/Ha)</h2>
             <p class="text-slate-300 text-sm mb-4 leading-relaxed">
                 Agrupamos los estados en 5 rangos de <i>eficiencia</i> según su <b>Rendimiento (ton/ha)</b>.
@@ -144,7 +152,11 @@
         <!-- Tercera Gráfica: Intervalos por Volumen de Producción -->
         <div
             class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-4">
-            <h2 class="text-xl sm:text-2xl font-bold text-blue-400 mb-2">Segmentación del Mercado: Volumen de Producción Neta</h2>
+            <button id="btn-dl-prod-interval" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Descargar CSV">
+                <svg class="w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="text-xs font-bold hidden sm:block">CSV</span>
+            </button>
+            <h2 class="text-xl sm:text-2xl font-bold text-blue-400 mb-2 pr-20">Segmentación del Mercado: Volumen de Producción Neta</h2>
             <p class="text-slate-300 text-sm mb-4 leading-relaxed">
                 Aquí agrupamos a los estados dependiendo del <b>tamaño bruto de su industria</b> (total de toneladas netas producidas). 
                 <br/>
@@ -155,14 +167,19 @@
         <!-- Cuarta Gráfica: Comparativa Nacional de Consumo -->
         <div
             class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-4">
-            <div class="flex justify-between items-start mb-2">
+            <button id="btn-dl-national" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500" title="Descargar CSV">
+                <svg class="w-5 h-5 text-purple-400 group-hover:text-purple-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="text-xs font-bold hidden sm:block">CSV</span>
+            </button>
+            <div class="flex justify-between items-start mb-2 pr-24">
                 <h2 class="text-xl sm:text-2xl font-bold text-purple-400">Análisis de Consumo Nacional: Dataset vs Realidad</h2>
                 <button id="btn-consumo-back" class="hidden bg-purple-600 hover:bg-purple-500 text-white font-bold py-1.5 px-4 rounded shadow-lg transition-all text-sm flex items-center gap-2">
                     ⬅️ Regresar a Totales
                 </button>
             </div>
             <p class="text-slate-300 text-sm mb-4 leading-relaxed" id="consumo-national-desc">
-                Comparativa directa del <b>Consumo Total de los 18 Estados (Dataset)</b> contra la Demanda Nacional (Promedio 45.8 Millones de Toneladas). La diferencia agrupa los 14 estados restantes.
+                Comparativa directa del <b>Consumo Total de los 18 Estados (Dataset)</b> contra la Demanda Demanda Nacional (Promedio 45.8 Millones de Toneladas). La diferencia agrupa los 14 estados restantes.
+                <br><span class="text-amber-400 font-semibold">⚠️ Nota: Los datos de los 14 estados faltantes fueron investigados en internet y promediados (no provienen del dataset original).</span>
                 <br><b>✨ ¡Haz clic en las barras (Dataset o Déficit) para desglosar sus estados interactivos!</b>
             </p>
             <div id="national-chart-container" class="w-full h-full flex-grow min-h-[300px]"></div>
@@ -171,7 +188,11 @@
         <!-- Quinta Gráfica: Comparativa Nacional de Producción (Drilldown) -->
         <div
             class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-6">
-            <div class="flex justify-between items-start mb-2">
+            <button id="btn-dl-prod-national" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" title="Descargar CSV">
+                <svg class="w-5 h-5 text-yellow-400 group-hover:text-yellow-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="text-xs font-bold hidden sm:block">CSV</span>
+            </button>
+            <div class="flex justify-between items-start mb-2 pr-24">
                 <h2 class="text-xl sm:text-2xl font-bold text-yellow-400">Desempeño de Producción Nacional (SIAP 2019)</h2>
                 <button id="btn-prod-back" class="hidden bg-yellow-600 hover:bg-yellow-500 text-slate-900 font-bold py-1.5 px-4 rounded shadow-lg transition-all text-sm flex items-center gap-2">
                     ⬅️ Regresar a Totales
