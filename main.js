@@ -314,13 +314,10 @@ function renderProdIntervalChart() {
                         <span class="text-sm font-semibold text-slate-300 mr-8">Producción Neta del Grupo:</span>
                         <span class="font-mono font-bold text-white">${formatNumber(b.sumProduccion)} ton</span>
                     </div>
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-sm font-semibold text-slate-300 mr-8">Aportación al Mercado (Market Share):</span>
-                        <span class="font-mono font-bold text-blue-400 text-base">${pct}% del Total País</span>
-                    </div>
-
-                    <div class="mb-1 text-slate-100 font-semibold text-xs border-t border-slate-600 pt-3">
-                        ESTADOS EN ESTA CLASIFICACIÓN (<b class="text-white text-base">${b.states.length}</b>)
+                    <div class="flex justify-between items-center mb-3 border-t border-slate-600 pt-3">
+                        <div class="mb-1 text-slate-100 font-semibold text-xs transition-colors">
+                            ESTADOS EN ESTA CLASIFICACIÓN (<b class="text-white text-base">${b.states.length}</b>)
+                        </div>
                     </div>
                     <div class="mt-1">
                         <table class="w-full text-sm bg-slate-900/30 rounded p-1">
