@@ -156,12 +156,20 @@
                 superpuestas grises y verdes revelan cuánto <b>Volumen Total (Producción y Consumo)</b> proviene de este
                 nivel estadístico leyendo la escala en el eje derecho.
             </p>
-            <!-- Nota de Insight sobre la Brecha Tecnológica -->
-            <div class="mb-5 p-3 bg-amber-900/10 border-l-4 border-amber-500/40 rounded-r-lg shadow-sm">
-                <p class="text-slate-300 text-xs leading-relaxed italic">
-                    <b class="text-amber-400">Contexto:</b> Los rangos de "Eficiencia Baja" suelen coincidir con estados de alta precipitación pero baja tecnificación (como <b>Oaxaca</b>), demostrando que la lluvia sin infraestructura no garantiza altos rendimientos.
-                </p>
-            </div>
+            <!-- Nota de Insight desplegable sobre la Brecha Tecnológica -->
+            <details class="mb-5 bg-amber-900/10 border-l-4 border-amber-500/40 rounded-r-lg shadow-sm group overflow-hidden transition-all duration-300">
+                <summary class="p-3 cursor-pointer text-amber-400 font-bold flex items-center gap-2 select-none hover:bg-amber-900/20 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Nota: La Brecha Tecnológica y la Paradoja de la Lluvia
+                    <span class="ml-auto text-[10px] sm:text-xs font-normal text-amber-500/60 group-open:hidden uppercase tracking-widest bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Click para analizar caso Oaxaca</span>
+                    <span class="ml-2 transform group-open:rotate-180 transition-transform duration-300 text-amber-600">▼</span>
+                </summary>
+                <div class="px-3 pb-4 pt-2 text-slate-300 text-xs sm:text-sm leading-relaxed italic border-t border-amber-500/10 mt-1 bg-slate-900/20">
+                    Observamos que altos niveles de lluvia (como en <b>Oaxaca o Chiapas</b>) no garantizan altos rendimientos. 
+                    <br><br>
+                    Esto evidencia la falta de infraestructura y tecnificación en el sur, donde la agricultura es principalmente de <b>temporal y autoconsumo</b>, a diferencia del norte tecnificado (como Sinaloa) que utiliza riego controlado y semillas mejoradas para multiplicar su eficiencia independientemente de la luvia estacional.
+                </div>
+            </details>
             <div id="interval-chart-container" class="w-full h-full flex-grow"></div>
         </div>
 
