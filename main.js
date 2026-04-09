@@ -798,19 +798,31 @@ function initOptions() {
             formatter: function (params) {
                 let tooltipHtml = `<div class="font-extrabold mb-1.5 text-base border-b border-slate-600 pb-1.5 text-emerald-400">📍 ${params[0].name} (Clic para desglosar)</div>`;
                 let sumConsumo = 0;
+                let prodTotalHtml = '';
                 params.forEach(param => {
                     const rawValue = param.data.rawValue;
-                    if (param.seriesName !== 'Producción Total' && !param.seriesName.includes('Hectáreas ')) {
-                        sumConsumo += rawValue;
-                    }
                     const unit = param.seriesName.includes('Hectáreas ') ? ' ha.' : (param.seriesName.includes('Precipitación') ? ' mm.' : ' ton.');
-                    tooltipHtml += `<div class="flex justify-between items-center my-0.5 gap-6">
-                                        <span class="flex items-center text-sm">${param.marker} ${param.seriesName}</span>
-                                        <span class="font-mono font-semibold text-sm">${formatNumber(rawValue)}${unit}</span>
-                                    </div>`;
+                    
+                    if (param.seriesName === 'Producción Total') {
+                        prodTotalHtml = `<div class="flex justify-between items-center mb-0.5 gap-6">
+                            <span class="flex items-center text-sm font-bold text-slate-100">${param.marker} ${param.seriesName}</span>
+                            <span class="font-mono font-bold text-sm text-white">${formatNumber(rawValue)}${unit}</span>
+                        </div>`;
+                    } else {
+                        if (!param.seriesName.includes('Hectáreas ') && !param.seriesName.includes('Precipitación')) {
+                            sumConsumo += rawValue;
+                        }
+                        tooltipHtml += `<div class="flex justify-between items-center my-0.5 gap-6">
+                                            <span class="flex items-center text-sm font-medium text-slate-300">${param.marker} ${param.seriesName}</span>
+                                            <span class="font-mono font-semibold text-sm text-slate-200">${formatNumber(rawValue)}${unit}</span>
+                                        </div>`;
+                    }
                 });
-                tooltipHtml += `<div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-600 font-bold text-emerald-400">
-                                    <span class="mr-4 text-sm">SUMA CONSUMO:</span><span class="font-mono text-sm">${formatNumber(sumConsumo)} ton.</span>
+                tooltipHtml += `<div class="mt-2 pt-2 border-t border-slate-600">
+                                    ${prodTotalHtml}
+                                    <div class="flex justify-between items-center mt-1 font-bold text-emerald-400">
+                                        <span class="mr-4 text-sm">SUMA CONSUMO:</span><span class="font-mono text-sm">${formatNumber(sumConsumo)} ton.</span>
+                                    </div>
                                 </div>`;
                 return tooltipHtml;
             }
