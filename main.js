@@ -816,7 +816,7 @@ function initOptions() {
             }
         },
         legend: {
-            data: ['Hectáreas Sembradas', 'Hectáreas Cosechadas', 'Hectáreas Siniestradas', 'Hectáreas Fugadas (No Cosechadas)', 'Producción Total', 'Semilla para siembra', 'Para consumo de la familia', 'Para consumo de animales', 'Para venta (Total)', 'Para venta (Exportacion)', 'Precipitación (Línea)', 'Precipitación (Barra)'],
+            data: ['Hectáreas Sembradas', 'Hectáreas Cosechadas', 'Hectáreas Siniestradas', 'Hectáreas Fugadas (No Cosechadas)', 'Producción Total', 'Semilla para siembra', 'Para consumo de la familia', 'Para consumo de animales', 'Para venta (Total)', 'Para venta (Exportacion)', 'Precipitación (Línea)'],
             textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
             top: 0, itemGap: 10
         },
@@ -877,8 +877,7 @@ function initOptions() {
             { name: 'Para consumo de animales', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.animales), rawValue: i.animales })), itemStyle: { color: '#60a5fa' } },
             { name: 'Para venta (Total)', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.ventaTotal), rawValue: i.ventaTotal })), itemStyle: { color: '#34d399' } },
             { name: 'Para venta (Exportacion)', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.ventaExp), rawValue: i.ventaExp })), itemStyle: { color: '#c084fc', borderRadius: [2, 2, 0, 0] } },
-            { name: 'Precipitación (Línea)', type: 'line', yAxisIndex: 2, data: data.map(i => ({ value: i.precipitacion, rawValue: i.precipitacion })), itemStyle: { color: '#00f2ff' }, symbolSize: 6, smooth: true, lineStyle: { width: 3, shadowBlur: 10, shadowColor: 'rgba(0, 242, 255, 0.5)' }, z: 15 },
-            { name: 'Precipitación (Barra)', type: 'bar', yAxisIndex: 2, data: data.map(i => ({ value: i.precipitacion, rawValue: i.precipitacion })), itemStyle: { color: 'rgba(0, 242, 255, 0.2)', borderColor: '#00f2ff', borderWidth: 1 }, z: 0 }
+            { name: 'Precipitación (Línea)', type: 'line', yAxisIndex: 2, data: data.map(i => ({ value: i.precipitacion, rawValue: i.precipitacion })), itemStyle: { color: '#00f2ff' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 15 }
         ]
     };
 }
