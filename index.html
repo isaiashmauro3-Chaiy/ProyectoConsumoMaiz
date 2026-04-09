@@ -140,56 +140,65 @@
             <div id="chart-container" class="w-full h-full flex-grow"></div>
         </div>
 
-        <!-- Segunda Gráfica: Intervalos Analíticos -->
-        <div
-            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mt-4 mb-4">
-            <button id="btn-dl-interval" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500" title="Descargar CSV">
-                <svg class="w-5 h-5 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span class="text-xs font-bold hidden sm:block">CSV</span>
-            </button>
-            <h2 class="text-xl sm:text-2xl font-bold text-emerald-400 mb-2 pr-20">Distribución de Estados por Rendimiento
-                Agrícola (Ton/Ha)</h2>
-            <p class="text-slate-300 text-sm mb-4 leading-relaxed">
-                Agrupamos los estados en 5 rangos de <i>eficiencia</i> según su <b>Rendimiento (ton/ha)</b>.
-                <br />
-                La altura de las barras (eje izquierdo) indica la <b>Cantidad de Estados</b> en cada nivel. Las líneas
-                superpuestas grises y verdes revelan cuánto <b>Volumen Total (Producción y Consumo)</b> proviene de este
-                nivel estadístico leyendo la escala en el eje derecho.
-            </p>
-            <div id="interval-chart-container" class="w-full h-[400px] flex-shrink-0"></div>
-
-            <!-- Nota de Insight desplegable sobre la Brecha Tecnológica (AHORA DEBAJO) -->
-            <details class="mt-4 bg-amber-900/10 border-l-4 border-amber-500/40 rounded-r-lg shadow-sm group overflow-hidden transition-all duration-300">
-                <summary class="p-3 cursor-pointer text-amber-400 font-bold flex items-center gap-2 select-none hover:bg-amber-900/20 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Nota: La Brecha Tecnológica y la Paradoja de la Lluvia
-                    <span class="ml-auto text-[10px] sm:text-xs font-normal text-amber-500/60 group-open:hidden uppercase tracking-widest bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Click para analizar caso Oaxaca</span>
-                    <span class="ml-2 transform group-open:rotate-180 transition-transform duration-300 text-amber-600">▼</span>
-                </summary>
-                <div class="px-3 pb-4 pt-2 text-slate-300 text-xs sm:text-sm leading-relaxed italic border-t border-amber-500/10 mt-1 bg-slate-900/20">
-                    Observamos que altos niveles de lluvia (como en <b>Oaxaca o Chiapas</b>) no garantizan altos rendimientos. 
-                    <br><br>
-                    Esto evidencia la falta de infraestructura y tecnificación en el sur, donde la agricultura es principalmente de <b>temporal y autoconsumo</b>, a diferencia del norte tecnificado (como Sinaloa) que utiliza riego controlado y semillas mejoradas para multiplicar su eficiencia independientemente de la luvia estacional.
+        <!-- TABLERO MAESTRO DE INTERVALOS ANALÍTICOS -->
+        <div class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-6 w-full flex-shrink-0 relative flex flex-col mb-8 transition-all duration-500 mt-4">
+            <!-- Header del Tablero Maestro -->
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-emerald-400 flex items-center gap-3">
+                        <span class="p-2 bg-emerald-500/10 rounded-lg">📊</span>
+                        Tablero Maestro de Intervalos
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">Selecciona una perspectiva para analizar la distribución nacional.</p>
                 </div>
-            </details>
+
+                <!-- Selector de Perspectiva (Tabs) -->
+                <div class="flex bg-slate-900/50 p-1.5 rounded-xl border border-slate-700 w-full lg:w-auto shadow-inner">
+                    <button id="btn-view-eff" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white" onclick="switchIntervalView('efficiency')">
+                        <span>🎯</span> Eficiencia
+                    </button>
+                    <button id="btn-view-scale" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg" onclick="switchIntervalView('scale')">
+                        <span>⚖️</span> Escala
+                    </button>
+                    <button id="btn-view-climate" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white" onclick="switchIntervalView('climate')">
+                        <span>☁️</span> Clima
+                    </button>
+                </div>
+
+                <button id="btn-dl-interval-master" class="bg-slate-700/80 hover:bg-slate-600 text-white p-2.5 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500" title="Descargar Datos Actuales">
+                    <svg class="w-5 h-5 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span class="text-xs font-bold hidden sm:block">Exportar Vista</span>
+                </button>
+            </div>
+
+            <!-- Contenedor Principal de la Gráfica -->
+            <div id="master-interval-container" class="w-full h-[450px] sm:h-[550px] flex-shrink-0 mb-6"></div>
+
+            <!-- Notas Dinámicas de Análisis -->
+            <div id="master-interval-insights" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Nota de la Brecha (Reubicada) -->
+                <details class="bg-amber-900/10 border-l-4 border-amber-500/40 rounded-r-lg group overflow-hidden transition-all duration-300">
+                    <summary class="p-3 cursor-pointer text-amber-400 font-bold flex items-center gap-2 select-none hover:bg-amber-900/20 text-xs sm:text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Perspectiva Crítica: La Brecha Tecnológica
+                        <span class="ml-auto transform group-open:rotate-180 transition-transform duration-300 text-amber-600">▼</span>
+                    </summary>
+                    <div class="px-3 pb-4 pt-2 text-slate-300 text-xs sm:text-sm leading-relaxed italic border-t border-amber-500/10 bg-slate-900/20">
+                        Observamos que altos niveles de lluvia (como en Oaxaca) no garantizan altos rendimientos. 
+                        Esto evidencia la falta de tecnificación en el sur, a diferencia del norte que utiliza riego controlado. En futuras etapas, integraremos datos de <b>Hectáreas Tecnificadas vs No Tecnificadas</b> para profundizar este análisis.
+                    </div>
+                </details>
+
+                <div class="bg-slate-700/30 p-3 rounded-lg border border-slate-600 items-center gap-3 hidden md:flex">
+                    <div class="p-2 bg-emerald-500/10 rounded-full text-lg">💡</div>
+                    <p class="text-slate-400 text-xs sm:text-sm leading-tight" id="master-view-description">
+                        Agrupación por volumen bruto de producción neta. Clasifica desde agricultura marginal hasta gigantes comerciales.
+                    </p>
+                </div>
+            </div>
         </div>
 
-        <!-- Tercera Gráfica: Intervalos por Volumen de Producción -->
-        <div
-            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-4">
-            <button id="btn-dl-prod-interval" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Descargar CSV">
-                <svg class="w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span class="text-xs font-bold hidden sm:block">CSV</span>
-            </button>
-            <h2 class="text-xl sm:text-2xl font-bold text-blue-400 mb-2 pr-20">Segmentación del Mercado: Volumen de Producción Neta</h2>
-            <p class="text-slate-300 text-sm mb-4 leading-relaxed">
-                Aquí agrupamos a los estados dependiendo del <b>tamaño bruto de su industria</b> (total de toneladas netas producidas). 
-                <br/>
-                La barra (eje izquierdo) muestra cuántos estados pertenecen a cada categoría (desde subsistencia marginal hasta los gigantes megaproductores). La <b>línea azul transversal (eje derecho)</b> revela el dato central para analizar el control del mercado: <b>¿Qué porcentaje (% Market Share) de la producción de todo el país es aportado por este grupo específico de estados?</b> 
-            </p>
-            <div id="prod-interval-chart-container" class="w-full h-full flex-grow min-h-[300px]"></div>
-        </div>
-        <!-- Cuarta Gráfica: Comparativa Nacional de Consumo -->
+        <!-- Comparativa Nacional de Consumo -->
         <div
             class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-4">
             <button id="btn-dl-national" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500" title="Descargar CSV">
@@ -210,9 +219,9 @@
             <div id="national-chart-container" class="w-full h-full flex-grow min-h-[300px]"></div>
         </div>
 
-        <!-- Quinta Gráfica: Comparativa Nacional de Producción (Drilldown) -->
+        <!-- Comparativa Nacional de Producción (Drilldown) -->
         <div
-            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-6">
+            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-8">
             <button id="btn-dl-prod-national" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" title="Descargar CSV">
                 <svg class="w-5 h-5 text-yellow-400 group-hover:text-yellow-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span class="text-xs font-bold hidden sm:block">CSV</span>
@@ -228,22 +237,6 @@
                 <br><b>✨ ¡Haz clic en la barra del Dataset (Verde) para desglosar y ver exactamente cuánto produjo cada estado individualmente!</b>
             </p>
             <div id="prod-national-chart-container" class="w-full h-full flex-grow min-h-[350px]"></div>
-        </div>
-
-        <!-- Sexta Gráfica: Intervalos por Precipitación -->
-        <div
-            class="bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700 p-4 sm:p-5 min-h-[350px] sm:min-h-[450px] w-full flex-shrink-0 relative flex flex-col overflow-hidden mb-6">
-            <button id="btn-dl-precip-interval" class="absolute top-4 right-4 z-10 bg-slate-700/80 hover:bg-slate-600 text-white p-2 rounded-lg shadow-md transition-all group flex items-center gap-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500" title="Descargar CSV">
-                <svg class="w-5 h-5 text-cyan-400 group-hover:text-cyan-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span class="text-xs font-bold hidden sm:block">CSV</span>
-            </button>
-            <h2 class="text-xl sm:text-2xl font-bold text-cyan-400 mb-2 pr-20">Análisis Climático: Intervalos de Precipitación Anual</h2>
-            <p class="text-slate-300 text-sm mb-4 leading-relaxed">
-                Clasificación de los estados según su nivel de lluvia acumulada (mm). 
-                <br/>
-                Permite observar si existe una correlación visual entre las zonas de alta precipitación (Tropical/Húmedo) y los rendimientos por hectárea más elevados.
-            </p>
-            <div id="precip-interval-chart-container" class="w-full h-full flex-grow min-h-[300px]"></div>
         </div>
 
         <!-- Evidencias y Fuentes -->

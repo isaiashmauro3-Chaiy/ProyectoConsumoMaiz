@@ -1,17 +1,12 @@
 const chartDom = document.getElementById('chart-container');
-const intervalChartDom = document.getElementById('interval-chart-container');
-const prodIntervalChartDom = document.getElementById('prod-interval-chart-container');
-
+const masterIntervalDom = document.getElementById('master-interval-container');
 const nationalChartDom = document.getElementById('national-chart-container');
 const prodNationalChartDom = document.getElementById('prod-national-chart-container');
-const precipIntervalChartDom = document.getElementById('precip-interval-chart-container');
 
 const myChart = echarts.init(chartDom, 'dark');
-const intervalChart = echarts.init(intervalChartDom, 'dark');
-const prodIntervalChart = echarts.init(prodIntervalChartDom, 'dark');
+const masterIntervalChart = echarts.init(masterIntervalDom, 'dark');
 const nationalChart = echarts.init(nationalChartDom, 'dark');
 const prodNationalChart = echarts.init(prodNationalChartDom, 'dark');
-const precipIntervalChart = echarts.init(precipIntervalChartDom, 'dark');
 
 const stateSelector = document.getElementById('state-selector');
 const btnBack = document.getElementById('btn-back');
@@ -30,6 +25,7 @@ const convertToK = (val) => val / 1000;
 
 // Estado global
 let isMainChart = true;
+let currentIntervalView = 'scale'; // 'efficiency' | 'scale' | 'climate'
 let data = [];
 let states = [];
 let mainOption = {};
@@ -110,309 +106,322 @@ function parseAndInitData(csvText) {
 
     initOptions();
     renderMainChart();
-    renderIntervalChart();
-    renderProdIntervalChart();
+    renderMasterInterval('scale');
     renderNationalChart();
     renderProdNationalChart();
-    renderPrecipitationIntervalChart();
 }
 
-// 3. Histograma de Intervalos por Eficiencia (Rendimiento)
-function renderIntervalChart() {
-    const buckets = [
-        { label: '0 a 2.5 ton/ha\n(Eficiencia Baja)', min: 0, max: 2.500, states: [], tooltipColor: '#ef4444', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 },
-        { label: '2.5 a 5.0 ton/ha\n(Eficiencia Regular)', min: 2.501, max: 5.000, states: [], tooltipColor: '#f97316', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 },
-        { label: '5.0 a 7.5 ton/ha\n(Eficiencia Buena)', min: 5.001, max: 7.500, states: [], tooltipColor: '#fbbf24', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 },
-        { label: '7.5 a 10.0 ton/ha\n(Eficiencia Muy Buena)', min: 7.501, max: 10.000, states: [], tooltipColor: '#34d399', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 },
-        { label: '+10.0 ton/ha\n(Nivel Exportación)', min: 10.001, max: 99999, states: [], tooltipColor: '#3b82f6', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 }
-    ];
+// --- LOGICA DE TABLERO MAESTRO DE INTERVALOS ---
 
+function switchIntervalView(viewType) {
+    currentIntervalView = viewType;
+    
+    // Actualizar estados visuales de los botones
+    const btnIds = { 'efficiency': 'btn-view-eff', 'scale': 'btn-view-scale', 'climate': 'btn-view-climate' };
+    Object.keys(btnIds).forEach(key => {
+        const btn = document.getElementById(btnIds[key]);
+        if (!btn) return;
+        if (key === viewType) {
+            btn.classList.add('bg-emerald-600', 'text-white', 'shadow-lg');
+            btn.classList.remove('text-slate-400', 'hover:text-white');
+        } else {
+            btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-lg');
+            btn.classList.add('text-slate-400', 'hover:text-white');
+        }
+    });
+
+    // Actualizar descripción dinámica
+    const desc = document.getElementById('master-view-description');
+    if (desc) {
+        if (viewType === 'efficiency') desc.innerText = 'Analizando distribución por rango de eficiencia (ton/ha). Ideal para identificar la brecha técnica.';
+        else if (viewType === 'scale') desc.innerText = 'Agrupación por volumen bruto de producción neta. Clasifica desde agricultura marginal hasta gigantes comerciales.';
+        else if (viewType === 'climate') desc.innerText = 'Correlación entre niveles de lluvia (mm) y resultados agrícolas. Crucial para el análisis de resiliencia hídrica.';
+    }
+
+    renderMasterInterval(viewType);
+}
+
+function renderMasterInterval(type) {
+    let buckets = [];
+    let valueGetter = null;
+
+    // 1. Configurar buckets según el tipo de vista
+    if (type === 'efficiency') {
+        buckets = [
+            { label: '0 a 2.5 ton/ha\n(Baja)', min: 0, max: 2.5, states: [], color: '#ef4444' },
+            { label: '2.5 a 5.0 ton/ha\n(Regular)', min: 2.501, max: 5, states: [], color: '#f97316' },
+            { label: '5.0 a 7.5 ton/ha\n(Buena)', min: 5.001, max: 7.5, states: [], color: '#fbbf24' },
+            { label: '7.5 a 10.0 ton/ha\n(Muy Buena)', min: 7.501, max: 10, states: [], color: '#34d399' },
+            { label: '+10.0 ton/ha\n(Exportación)', min: 10.001, max: 999, states: [], color: '#3b82f6' }
+        ];
+        valueGetter = (item) => item.rendimiento;
+    } else if (type === 'scale') {
+        buckets = [
+            { label: '0 - 100k ton\n(Subsistencia)', min: 0, max: 100000, states: [], color: '#94a3b8' },
+            { label: '100k - 500k ton\n(Pequeña)', min: 100001, max: 500000, states: [], color: '#64748b' },
+            { label: '500k - 1M ton\n(Mediana)', min: 500001, max: 1000000, states: [], color: '#334155' },
+            { label: '1M - 3M ton\n(Grande)', min: 1000001, max: 3000000, states: [], color: '#1e293b' },
+            { label: '+3M ton\n(Industrial)', min: 3000001, max: 99999999, states: [], color: '#020617' }
+        ];
+        valueGetter = (item) => item.produccion;
+    } else if (type === 'climate') {
+        buckets = [
+            { label: '0-300 mm\n(Seco)', min: 0, max: 300, states: [], color: '#f87171' },
+            { label: '300-600 mm\n(Semi-seco)', min: 301, max: 600, states: [], color: '#fbbf24' },
+            { label: '600-900 mm\n(Templado)', min: 601, max: 900, states: [], color: '#34d399' },
+            { label: '900+ mm\n(Húmedo)', min: 901, max: 9999, states: [], color: '#00f2ff' }
+        ];
+        valueGetter = (item) => item.precipitacion;
+    }
+
+    // Inicializar acumuladores
+    buckets.forEach(b => {
+        b.stateData = []; 
+        b.sumProd = 0;
+        b.sumConsumo = 0;
+        b.sumRend = 0;
+        b.sumPrecip = 0;
+        b.sumHec = 0; // Nueva métrica: Superficie Cosechada
+    });
+
+    // Agrupar datos
     data.forEach(item => {
-        const r = item.rendimiento;
+        const val = valueGetter(item);
         for (let b of buckets) {
-            if (r >= b.min && r <= b.max) {
-                b.states.push(item);
-                b.sumProduccion += item.produccion;
+            if (val >= b.min && val <= b.max) {
+                b.stateData.push(item);
+                b.sumProd += item.produccion;
                 b.sumConsumo += item.consumoTotal;
-                b.sumPrecipitation += item.precipitacion;
+                b.sumRend += item.rendimiento;
+                b.sumPrecip += item.precipitacion;
+                b.sumHec += item.cosechada;
                 break;
             }
         }
     });
 
-    const intervalOption = {
-        backgroundColor: 'transparent',
-        legend: {
-            data: ['Cantidad de Estados', 'Volumen de Producción', 'Volumen de Consumo', 'Precipitación Promedio'],
-            textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
-            top: 0
-        },
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            borderColor: '#334155', borderWidth: 1, padding: [14, 18],
-            confine: true,
-            enterable: true,
-            extraCssText: 'max-height: 320px; overflow-y: auto; pointer-events: auto;',
-            formatter: function (params) {
-                const index = params[0].dataIndex;
-                const b = buckets[index];
+    // Filtrar series segun requerimiento
+    let finalLegend = ['Cantidad de Estados', 'Producción Total', 'Consumo Total', (type === 'efficiency' ? 'Hectáreas Cosechadas' : (type === 'climate' ? 'Prom. Rendimiento' : 'Precipitación Prom.'))];
+    let thirdMetricName = (type === 'climate' ? 'Prom. Rendimiento' : 'Precipitación Prom.');
+    if (type === 'efficiency') {
+        thirdMetricName = 'Hectáreas Cosechadas';
+        finalLegend = ['Cantidad de Estados', 'Hectáreas Cosechadas', 'Eficiencia Prom.'];
+    }
 
-                let statesListHtml = b.states.length === 0
-                    ? '<tr><td colspan="2" class="text-slate-400 italic pt-2 pb-1">Ningún estado en este rango</td></tr>'
-                    : b.states.sort((a, b) => b.rendimiento - a.rendimiento).map(s =>
-                        `<tr>
-                            <td class="text-slate-300 pr-5 py-0.5 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${b.tooltipColor}"></span>${s.estado}</td>
-                            <td class="font-mono text-emerald-300 text-right py-0.5 font-bold">${formatNumber(s.rendimiento)} <span class="text-xs text-slate-400 font-normal">ton/ha</span></td>
-                        </tr>`
-                    ).join('');
+    let finalSeries = [
+        {
+            name: 'Cantidad de Estados',
+            type: 'bar',
+            barWidth: '45%',
+            data: buckets.map(b => ({
+                value: b.stateData.length,
+                itemStyle: { color: b.color, borderRadius: [4, 4, 0, 0] }
+            })),
+            label: { show: true, position: 'top', color: '#cbd5e1', fontSize: 10 }
+        }
+    ];
 
-                return `
-                    <div class="font-extrabold mb-2 text-lg text-emerald-400 border-b border-slate-600 pb-2">${b.label.replace('\n', ' ')}</div>
-                    
-                    <div class="flex justify-between items-center mt-2 mb-1">
-                        <span class="text-sm font-semibold text-slate-300 mr-8">Rango: Producción Agregada:</span>
-                        <span class="font-mono font-bold text-white">${formatNumber(b.sumProduccion)} ton</span>
-                    </div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm font-semibold text-slate-300 mr-8">Rango: Consumo Agregado:</span>
-                        <span class="font-mono font-bold text-white">${formatNumber(b.sumConsumo)} ton</span>
-                    </div>
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-sm font-semibold text-slate-300 mr-8">Precipitación Promedio:</span>
-                        <span class="font-mono font-bold text-cyan-400">${b.states.length > 0 ? (b.sumPrecipitation / b.states.length).toFixed(1) : 0} mm</span>
-                    </div>
-
-                    <div class="mb-1 text-slate-100 font-semibold text-xs border-t border-slate-600 pt-3">
-                        COMPOSICIÓN DE ESTADOS EN INFRAESTRUCTURA (<b class="text-white text-base">${b.states.length}</b>)
-                    </div>
-                    <div class="mt-1">
-                        <table class="w-full text-sm bg-slate-900/30 rounded p-1">
-                            ${statesListHtml}
-                        </table>
-                    </div>
-                `;
-            }
-        },
-        grid: { left: '5%', right: '5%', bottom: '15%', top: '22%', containLabel: true },
-        xAxis: {
-            type: 'category',
-            data: buckets.map(b => b.label),
-            axisLabel: { color: '#94a3b8', interval: 0, fontWeight: '600', fontSize: 13, lineHeight: 18 },
-            axisLine: { lineStyle: { color: '#475569', width: 2 } },
-            axisTick: { show: false }
-        },
-        yAxis: [
+    if (type !== 'efficiency') {
+        finalSeries.push(
             {
-                type: 'value',
-                name: 'Cantidad de Estados',
-                nameTextStyle: { color: '#10b981', fontWeight: 'bold', fontSize: 13, align: 'left', padding: [0, 0, 10, -10] },
-                axisLabel: { color: '#94a3b8', fontWeight: 'bold', fontSize: 13 },
-                splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } },
-                minInterval: 1
-            },
-            {
-                type: 'value',
-                name: 'Volúmenes (x 1,000 Ton)',
-                nameLocation: 'end',
-                nameGap: 15,
-                nameTextStyle: { color: '#cbd5e1', fontWeight: 'bold', fontSize: 12, align: 'right' },
-                axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: (value) => formatNumber(value) },
-                splitLine: { show: false }
-            }
-        ],
-        series: [
-            {
-                name: 'Cantidad de Estados',
-                type: 'bar',
-                barWidth: '50%',
-                yAxisIndex: 0,
-                data: buckets.map(b => ({
-                    value: b.states.length,
-                    itemStyle: { color: b.tooltipColor, borderRadius: [6, 6, 0, 0] }
-                })),
-                label: {
-                    show: true, position: 'top', color: '#fff', fontSize: 16, fontWeight: 'bold',
-                    formatter: (p) => p.value > 0 ? p.value : ''
-                }
-            },
-            {
-                name: 'Volumen de Producción',
+                name: 'Producción Total',
                 type: 'line',
                 yAxisIndex: 1,
-                data: buckets.map(b => ({ value: convertToK(b.sumProduccion), rawValue: b.sumProduccion })),
+                data: buckets.map(b => convertToK(b.sumProd)),
                 itemStyle: { color: '#94a3b8' },
-                symbolSize: 8,
-                lineStyle: { width: 3, type: 'dashed' }
+                symbolSize: 6,
+                lineStyle: { width: 2, type: 'dashed' }
             },
             {
-                name: 'Volumen de Consumo',
+                name: 'Consumo Total',
                 type: 'line',
                 yAxisIndex: 1,
-                data: buckets.map(b => ({ value: convertToK(b.sumConsumo), rawValue: b.sumConsumo })),
+                data: buckets.map(b => convertToK(b.sumConsumo)),
                 itemStyle: { color: '#34d399' },
+                symbolSize: 6,
+                lineStyle: { width: 3 }
+            }
+        );
+    }
+
+    // Agregar métricas específicas (Eficiencia / Hectáreas / Clima)
+    if (type === 'efficiency') {
+        finalSeries.push(
+            {
+                name: 'Hectáreas Cosechadas',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => convertToK(b.sumHec)),
+                itemStyle: { color: '#fbbf24' },
                 symbolSize: 8,
                 lineStyle: { width: 3 }
             },
             {
-                name: 'Precipitación Promedio',
+                name: 'Eficiencia Prom.',
                 type: 'line',
                 yAxisIndex: 1,
-                data: buckets.map(b => ({ 
-                    value: b.states.length > 0 ? (b.sumPrecipitation / b.states.length).toFixed(1) : 0,
-                    rawValue: b.states.length > 0 ? b.sumPrecipitation / b.states.length : 0 
-                })),
-                itemStyle: { color: '#22d3ee' },
-                symbolSize: 10,
-                lineStyle: { width: 4, type: 'dotted' }
+                data: buckets.map(b => (b.sumRend / (b.stateData.length || 1)).toFixed(2)),
+                itemStyle: { color: '#10b981' },
+                symbolSize: 8,
+                lineStyle: { width: 3 }
             }
-        ]
-    };
-    intervalChart.setOption(intervalOption);
-}
+        );
+    } else {
+        finalSeries.push({
+            name: thirdMetricName,
+            type: 'line',
+            yAxisIndex: 1,
+            data: buckets.map(b => {
+                if (type === 'climate') return (b.sumRend / (b.stateData.length || 1)).toFixed(2);
+                return (b.sumPrecip / (b.stateData.length || 1)).toFixed(1);
+            }),
+            itemStyle: { color: (type === 'climate' ? '#10b981' : '#06b6d4') },
+            symbolSize: 8,
+            lineStyle: { width: 3 }
+        });
+    }
 
-// 4. Histograma de Intervalos por Volumen Bruto de Producción
-function renderProdIntervalChart() {
-    const totalNacional = data.reduce((sum, item) => sum + item.produccion, 0);
-
-    const buckets = [
-        { label: '0 a 200k ton\n(Producción Marginal)', min: 0, max: 200000, states: [], tooltipColor: '#ef4444', sumProduccion: 0, sumConsumo: 0 },
-        { label: '200k a 500k ton\n(Productores Menores)', min: 200001, max: 500000, states: [], tooltipColor: '#f97316', sumProduccion: 0, sumConsumo: 0 },
-        { label: '500k a 1M ton\n(Productores Medios)', min: 500001, max: 1000000, states: [], tooltipColor: '#fbbf24', sumProduccion: 0, sumConsumo: 0 },
-        { label: '1M a 2M ton\n(Productores Mayores)', min: 1000001, max: 2000000, states: [], tooltipColor: '#34d399', sumProduccion: 0, sumConsumo: 0 },
-        { label: '+ 2 Millones ton\n(Megaproductores)', min: 2000001, max: 99999999, states: [], tooltipColor: '#3b82f6', sumProduccion: 0, sumConsumo: 0 }
-    ];
-
-    data.forEach(item => {
-        const p = item.produccion;
-        for (let b of buckets) {
-            if (p >= b.min && p <= b.max) {
-                b.states.push(item);
-                b.sumProduccion += item.produccion;
-                b.sumConsumo += item.consumoTotal;
-                break;
+    if (type === 'scale') {
+        finalLegend = ['Producción Total', 'Consumo Total', 'Eficiencia Prom.', 'Lluvia Prom.'];
+        finalSeries = [
+            {
+                name: 'Producción Total',
+                type: 'bar',
+                yAxisIndex: 1,
+                data: buckets.map(b => convertToK(b.sumProd)),
+                itemStyle: { color: '#94a3b8', borderRadius: [4, 4, 0, 0] },
+                label: { show: true, position: 'top', color: '#94a3b8', fontSize: 9, formatter: (v) => formatNumber(v.value) }
+            },
+            {
+                name: 'Consumo Total',
+                type: 'bar',
+                yAxisIndex: 1,
+                data: buckets.map(b => convertToK(b.sumConsumo)),
+                itemStyle: { color: '#34d399', borderRadius: [4, 4, 0, 0] },
+                label: { show: true, position: 'top', color: '#34d399', fontSize: 9, formatter: (v) => formatNumber(v.value) }
+            },
+            {
+                name: 'Eficiencia Prom.',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => (b.sumRend / (b.stateData.length || 1)).toFixed(2)),
+                itemStyle: { color: '#10b981' },
+                symbolSize: 8,
+                lineStyle: { width: 3 }
+            },
+            {
+                name: 'Lluvia Prom.',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => (b.sumPrecip / (b.stateData.length || 1)).toFixed(1)),
+                itemStyle: { color: '#06b6d4' },
+                symbolSize: 8,
+                lineStyle: { width: 3 }
             }
-        }
-    });
+        ];
+    }
 
     const option = {
+        animationDuration: 1000,
         backgroundColor: 'transparent',
         legend: {
-            data: ['Cantidad de Estados', 'Volumen de Producción', 'Volumen de Consumo'],
-            textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
+            data: finalLegend,
+            textStyle: { color: '#cbd5e1', fontSize: 11 },
             top: 0
         },
         tooltip: {
             trigger: 'axis',
             axisPointer: { type: 'shadow' },
             backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            borderColor: '#334155', borderWidth: 1, padding: [14, 18],
-            confine: true,
+            borderColor: '#334155',
+            padding: [12, 16],
+            extraCssText: 'max-height: 400px; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); pointer-events: auto;',
             enterable: true,
-            extraCssText: 'max-height: 320px; overflow-y: auto; pointer-events: auto;',
-            formatter: function (params) {
-                const index = params[0].dataIndex;
-                const b = buckets[index];
-                const pct = ((b.sumProduccion / totalNacional) * 100).toFixed(2);
+            formatter: function(params) {
+                const b = buckets[params[0].dataIndex];
+                const avgRend = (b.sumRend / (b.stateData.length || 1)).toFixed(2);
+                const avgPrecip = (b.sumPrecip / (b.stateData.length || 1)).toFixed(1);
+                const isEff = (type === 'efficiency');
+                
+                let rowsHtml = b.stateData.sort((a,b) => b.produccion - a.produccion).map(s => `
+                    <tr class="border-b border-white/10 hover:bg-white/5 transition-all">
+                        <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
+                        ${isEff ? '' : `<td class="py-3 px-3 text-right font-mono text-slate-100 text-[12px] font-black">${formatNumber(s.produccion)}</td>`}
+                        ${isEff ? '' : `<td class="py-3 px-3 text-right font-mono text-emerald-400 text-[12px] font-black">${formatNumber(s.consumoTotal)}</td>`}
+                        <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
+                        <td class="py-3 px-3 text-right font-mono text-${isEff ? 'amber-400' : 'sky-400'} text-[12px] font-black">${isEff ? formatNumber(s.cosechada) : s.precipitacion.toFixed(0)}</td>
+                    </tr>
+                `).join('');
 
-                let statesListHtml = b.states.length === 0
-                    ? '<tr><td colspan="2" class="text-slate-400 italic pt-2 pb-1">Ningún estado en esta categoría</td></tr>'
-                    : b.states.sort((a, b) => b.produccion - a.produccion).map(s =>
-                        `<tr>
-                            <td class="text-slate-300 pr-5 py-0.5 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${b.tooltipColor}"></span>${s.estado}</td>
-                            <td class="font-mono text-emerald-300 text-right py-0.5 font-bold">${formatNumber(s.produccion)} <span class="text-xs text-slate-400 font-normal">ton</span></td>
-                        </tr>`
-                    ).join('');
-
-                return `
-                    <div class="font-extrabold mb-2 text-lg text-blue-400 border-b border-slate-600 pb-2">${b.label.replace('\n', ' ')}</div>
-                    
-                    <div class="flex justify-between items-center mt-2 mb-1">
-                        <span class="text-sm font-semibold text-slate-300 mr-8">Producción Neta del Grupo:</span>
-                        <span class="font-mono font-bold text-white">${formatNumber(b.sumProduccion)} ton</span>
-                    </div>
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-sm font-semibold text-slate-300 mr-8">Consumo Neto del Grupo:</span>
-                        <span class="font-mono font-bold text-emerald-400">${formatNumber(b.sumConsumo)} ton</span>
-                    </div>
-                    <div class="flex justify-between items-center mb-3 border-t border-slate-600 pt-3">
-                        <div class="mb-1 text-slate-100 font-semibold text-xs transition-colors">
-                            ESTADOS EN ESTA CLASIFICACIÓN (<b class="text-white text-base">${b.states.length}</b>)
+                let html = `
+                    <div class="mb-4">
+                        <div class="flex items-center gap-3 mb-1.5">
+                            <span class="w-4 h-4 rounded-full shadow-lg" style="background-color: ${b.color}; box-shadow: 0 0 10px ${b.color}80;"></span>
+                            <div class="font-black text-emerald-400" style="font-size: 18px; letter-spacing: -0.5px;">${b.label.replace('\n', ' ')}</div>
                         </div>
+                        <div class="text-[12px] text-slate-400 italic ml-7 font-medium">Análisis de ${b.stateData.length} estados</div>
                     </div>
-                    <div class="mt-1">
-                        <table class="w-full text-sm bg-slate-900/30 rounded p-1">
-                            ${statesListHtml}
+
+                    <div class="overflow-hidden rounded-xl border border-white/20 mb-5 shadow-2xl bg-black/40 backdrop-blur-sm">
+                        <table class="w-full border-collapse">
+                            <thead class="bg-white/10 text-slate-300 uppercase tracking-widest text-[10px]">
+                                <tr>
+                                    <th class="p-3 text-left font-black">ESTADO</th>
+                                    ${isEff ? '' : '<th class="p-3 text-right font-black">PROD.</th>'}
+                                    ${isEff ? '' : '<th class="p-3 text-right font-black text-emerald-400">CONS.</th>'}
+                                    <th class="p-3 text-right font-black text-cyan-400">EF.</th>
+                                    <th class="p-3 text-right font-black text-${isEff ? 'amber-400' : 'sky-400'}">${isEff ? 'HEC.' : 'LLUV.'}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml || `<tr><td colspan="${isEff ? 3 : 5}" class="py-10 text-center text-slate-500 italic font-black text-base">Sin registros</td></tr>`}
+                            </tbody>
                         </table>
                     </div>
-                `;
+
+                    <div class="grid grid-cols-2 gap-x-10 gap-y-5 border-t border-white/20 pt-5 mt-2">
+                        <div>
+                            <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">TOTAL PRODUCCIÓN</div>
+                            <div class="font-mono font-black text-white text-base">${formatNumber(b.sumProd)} <span class="text-[11px] font-normal text-slate-500">ton</span></div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] text-emerald-600 uppercase font-black tracking-widest text-right mb-1">TOTAL CONSUMO</div>
+                            <div class="font-mono font-black text-emerald-400 text-base">${formatNumber(b.sumConsumo)} <span class="text-[11px] font-normal text-slate-500">ton</span></div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-cyan-600 uppercase font-black tracking-widest mb-1">EFICIENCIA PROM.</div>
+                            <div class="font-mono font-black text-cyan-400 text-base">${avgRend} <span class="text-[11px] font-normal text-slate-700">t/ha</span></div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] text-${isEff ? 'amber-600' : 'sky-600'} uppercase font-black tracking-widest text-right mb-1">${isEff ? 'TOTAL HECTÁREAS' : 'LLUVIA PROM.'}</div>
+                            <div class="font-mono font-black text-${isEff ? 'amber-400' : 'sky-400'} text-base">${isEff ? formatNumber(b.sumHec) : avgPrecip} <span class="text-[11px] font-normal text-slate-700">${isEff ? 'ha' : 'mm'}</span></div>
+                        </div>
+                    </div>`;
+                
+                return html;
             }
         },
-        grid: { left: '5%', right: '5%', bottom: '15%', top: '22%', containLabel: true },
+        grid: { top: '15%', bottom: '12%', left: '4%', right: '4%', containLabel: true },
         xAxis: {
             type: 'category',
             data: buckets.map(b => b.label),
-            axisLabel: { color: '#94a3b8', interval: 0, fontWeight: '600', fontSize: 13, lineHeight: 18 },
-            axisLine: { lineStyle: { color: '#475569', width: 2 } },
-            axisTick: { show: false }
+            axisLabel: { color: '#94a3b8', fontSize: 10, fontWeight: '600' }
         },
         yAxis: [
-            {
-                type: 'value',
-                name: 'Cantidad de Estados',
-                nameTextStyle: { color: '#10b981', fontWeight: 'bold', fontSize: 13, align: 'left', padding: [0, 0, 10, -10] },
-                axisLabel: { color: '#94a3b8', fontWeight: 'bold', fontSize: 13 },
-                splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } },
-                minInterval: 1
-            },
-            {
-                type: 'value',
-                name: 'Volúmenes (x 1,000 Ton)',
-                nameLocation: 'end',
-                nameGap: 15,
-                nameTextStyle: { color: '#cbd5e1', fontWeight: 'bold', fontSize: 12, align: 'right' },
-                axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: (value) => formatNumber(value) },
-                splitLine: { show: false }
+            { type: 'value', name: 'Estados', axisLabel: { color: '#64748b' }, splitLine: { show: false }, show: (type !== 'scale') },
+            { 
+                type: 'value', 
+                name: 'Toneladas Metricas (k)', 
+                axisLabel: { color: '#64748b', formatter: (v) => v >= 1000 ? (v/1000).toFixed(1)+'M' : v+'k' },
+                splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } }
             }
         ],
-        series: [
-            {
-                name: 'Cantidad de Estados (Escala Izquierda)',
-                type: 'bar',
-                barWidth: '50%',
-                yAxisIndex: 0,
-                data: buckets.map(b => ({
-                    value: b.states.length,
-                    itemStyle: { color: b.tooltipColor, borderRadius: [6, 6, 0, 0] }
-                })),
-                label: {
-                    show: true, position: 'top', color: '#fff', fontSize: 16, fontWeight: 'bold',
-                    formatter: (p) => p.value > 0 ? p.value : ''
-                }
-            },
-            {
-                name: 'Volumen de Producción',
-                type: 'line',
-                yAxisIndex: 1,
-                data: buckets.map(b => ({ value: convertToK(b.sumProduccion), rawValue: b.sumProduccion })),
-                itemStyle: { color: '#94a3b8' },
-                symbolSize: 8,
-                lineStyle: { width: 3, type: 'dashed' }
-            },
-            {
-                name: 'Volumen de Consumo',
-                type: 'line',
-                yAxisIndex: 1,
-                data: buckets.map(b => ({ value: convertToK(b.sumConsumo), rawValue: b.sumConsumo })),
-                itemStyle: { color: '#34d399' },
-                symbolSize: 8,
-                lineStyle: { width: 3 }
-            }
-        ]
+        series: finalSeries
     };
-    prodIntervalChart.setOption(option);
+
+    masterIntervalChart.setOption(option, true);
 }
+
 
 
 // 5. Gráfica Comparativa Nacional
@@ -1051,11 +1060,9 @@ btnBack.addEventListener('click', renderMainChart);
 window.addEventListener('resize', () => {
     setTimeout(() => {
         myChart.resize();
-        intervalChart.resize();
-        prodIntervalChart.resize();
+        masterIntervalChart.resize();
         nationalChart.resize();
         prodNationalChart.resize();
-        precipIntervalChart.resize();
     }, 150);
 });
 
@@ -1080,67 +1087,90 @@ document.getElementById('btn-dl-main').addEventListener('click', () => {
     downloadCSV('Maiz_Dataset_Unificado_Principal.csv', rawCsvData);
 });
 
-document.getElementById('btn-dl-interval').addEventListener('click', () => {
-    // Reconstruimos la tabla que estamos mostrando visualmente
-    let csv = 'Rango de Eficiencia (Ton/Ha),Cantidad de Estados,Estados Integrantes,Volumen Produccion Agregada (Ton),Volumen Consumo Agregado (Ton)\n';
+document.getElementById('btn-dl-interval-master').addEventListener('click', () => {
+    let csv = '';
+    let fn = '';
+    const type = currentIntervalView;
+
+    if (type === 'efficiency') {
+        csv = 'Rango de Eficiencia (Ton/Ha),Cantidad de Estados,Estados Integrantes,Produccion Total (Ton),Consumo Total (Ton),Precipitacion Promedio (mm)\n';
+        fn = 'Analisis_Intervalos_Eficiencia.csv';
+    } else if (type === 'scale') {
+        csv = 'Categoria de Escala de Produccion,Cantidad de Estados,Estados Integrantes,Produccion Total (Ton),Consumo Total (Ton),Rendimiento Promedio (ton/ha)\n';
+        fn = 'Analisis_Intervalos_Escala.csv';
+    } else {
+        csv = 'Rango de Precipitacion (mm),Cantidad de Estados,Estados Integrantes,Produccion Total (Ton),Consumo Total (Ton),Rendimiento Promedio (ton/ha)\n';
+        fn = 'Analisis_Intervalos_Clima.csv';
+    }
+
+    // Usar la misma lógica de buckets que el renderizado para consistencia
+    renderMasterInterval(type); // Asegurar que buckets estén frescos si hiciéramos lógica compartida, pero mejor lo calculo aquí rápido o comparto buckets
     
-    const buckets = [
-        { label: '0 a 2.5 ton/ha (Eficiencia Baja)', min: 0, max: 2.500, states: [], sumProd: 0, sumConsumo: 0 },
-        { label: '2.5 a 5.0 ton/ha (Eficiencia Regular)', min: 2.501, max: 5.000, states: [], sumProd: 0, sumConsumo: 0 },
-        { label: '5.0 a 7.5 ton/ha (Eficiencia Buena)', min: 5.001, max: 7.500, states: [], sumProd: 0, sumConsumo: 0 },
-        { label: '7.5 a 10.0 ton/ha (Eficiencia Muy Buena)', min: 7.501, max: 10.000, states: [], sumProd: 0, sumConsumo: 0 },
-        { label: '+10.0 ton/ha (Nivel Exportacion)', min: 10.001, max: 99999, states: [], sumProd: 0, sumConsumo: 0 }
-    ];
+    // Para simplificar y no duplicar lógica de buckets, vamos a disparar una función que genere el CSV basado en la vista actual
+    const opt = masterIntervalChart.getOption();
+    const xData = opt.xAxis[0].data;
+    
+    // Re-calculamos buckets locales para el CSV
+    const dataToExport = calculateBucketsForCSV(type);
+    dataToExport.forEach(b => {
+        const integrantes = b.states.join('; ');
+        const avgVal = (b.sumExtra / (b.states.length || 1)).toFixed(2);
+        csv += `"${b.label.replace('\n', ' ')}",${b.states.length},"${integrantes}",${b.sumProd.toFixed(2)},${b.sumConsumo.toFixed(2)},${avgVal}\n`;
+    });
+
+    downloadCSV(fn, csv);
+});
+
+function calculateBucketsForCSV(type) {
+    let buckets = [];
+    let getter = null;
+    let extraGetter = null;
+
+    if (type === 'efficiency') {
+        buckets = [
+            { label: '0-2.5 ton/ha', min: 0, max: 2.5, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '2.5-5.0 ton/ha', min: 2.501, max: 5, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '5.0-7.5 ton/ha', min: 5.001, max: 7.5, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '7.5-10.0 ton/ha', min: 7.501, max: 10, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '10.0+ ton/ha', min: 10.001, max: 999, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 }
+        ];
+        getter = (i) => i.rendimiento;
+        extraGetter = (i) => i.precipitacion;
+    } else if (type === 'scale') {
+        buckets = [
+            { label: '0-100k ton', min: 0, max: 100000, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '100k-500k ton', min: 100001, max: 500000, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '500k-1M ton', min: 500001, max: 1000000, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '1M-3M ton', min: 1000001, max: 3000000, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '3M+ ton', min: 3000001, max: 99999999, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 }
+        ];
+        getter = (i) => i.produccion;
+        extraGetter = (i) => i.rendimiento;
+    } else {
+        buckets = [
+            { label: '0-300 mm', min: 0, max: 300, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '300-600 mm', min: 301, max: 600, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '600-900 mm', min: 601, max: 900, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
+            { label: '900+ mm', min: 901, max: 9999, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 }
+        ];
+        getter = (i) => i.precipitacion;
+        extraGetter = (i) => i.rendimiento;
+    }
 
     data.forEach(item => {
-        const r = item.rendimiento;
+        const val = getter(item);
         for (let b of buckets) {
-            if (r >= b.min && r <= b.max) {
+            if (val >= b.min && val <= b.max) {
                 b.states.push(item.estado);
                 b.sumProd += item.produccion;
                 b.sumConsumo += item.consumoTotal;
+                b.sumExtra += extraGetter(item);
                 break;
             }
         }
     });
-
-    buckets.forEach(b => {
-        csv += `"${b.label}",${b.states.length},"${b.states.join(', ')}",${b.sumProd},${b.sumConsumo}\n`;
-    });
-    
-    downloadCSV('Analisis_Intervalos_Rendimiento.csv', csv);
-});
-
-document.getElementById('btn-dl-prod-interval').addEventListener('click', () => {
-    let csv = 'Categoria de Produccion,Cantidad de Estados,Estados Integrantes,Produccion Neta del Grupo (Ton),Porcentaje Participacion Mercado Nacional\n';
-    const totalNacional = data.reduce((sum, item) => sum + item.produccion, 0);
-
-    const buckets = [
-        { label: '0 a 200k ton (Produccion Marginal)', min: 0, max: 200000, states: [], sumProd: 0 },
-        { label: '200k a 500k ton (Productores Menores)', min: 200001, max: 500000, states: [], sumProd: 0 },
-        { label: '500k a 1M ton (Productores Medios)', min: 500001, max: 1000000, states: [], sumProd: 0 },
-        { label: '1M a 2M ton (Productores Mayores)', min: 1000001, max: 2000000, states: [], sumProd: 0 },
-        { label: '+ 2 Millones ton (Megaproductores)', min: 2000001, max: 99999999, states: [], sumProd: 0 }
-    ];
-
-    data.forEach(item => {
-        const p = item.produccion;
-        for (let b of buckets) {
-            if (p >= b.min && p <= b.max) {
-                b.states.push(item.estado);
-                b.sumProd += item.produccion;
-                break;
-            }
-        }
-    });
-
-    buckets.forEach(b => {
-        const pct = ((b.sumProd / totalNacional) * 100).toFixed(2) + '%';
-        csv += `"${b.label}",${b.states.length},"${b.states.join(', ')}",${b.sumProd},"${pct}"\n`;
-    });
-
-    downloadCSV('Segmentacion_Mercado_Produccion.csv', csv);
-});
+    return buckets;
+}
 
 // Función genérica para extraer datos de la instancia de gráfica viva (Ideal para Drilldowns)
 function getEchartsDataToCSV(chartInstance, TitleHeader, ValueHeader) {
@@ -1170,155 +1200,5 @@ document.getElementById('btn-dl-prod-national').addEventListener('click', () => 
     downloadCSV(`Desempeno_Produccion_Nacional_${suffix}.csv`, csv);
 });
 
-document.getElementById('btn-dl-precip-interval').addEventListener('click', () => {
-    let csv = 'Rango de Precipitacion (mm),Cantidad de Estados,Estados Integrantes,Promedio de Rendimiento (ton/ha),Produccion Total (ton),Consumo Total (ton)\n';
-    
-    const buckets = [
-        { label: '0-300 mm (Arido/Seco)', min: 0, max: 300, states: [], sumRend: 0, sumProd: 0, sumConsumo: 0 },
-        { label: '300-600 mm (Semi-seco)', min: 301, max: 600, states: [], sumRend: 0, sumProd: 0, sumConsumo: 0 },
-        { label: '600-900 mm (Templado/Humedo)', min: 601, max: 900, states: [], sumRend: 0, sumProd: 0, sumConsumo: 0 },
-        { label: '900+ mm (Tropical/Abundante)', min: 901, max: 9999, states: [], sumRend: 0, sumProd: 0, sumConsumo: 0 }
-    ];
 
-    data.forEach(item => {
-        const p = item.precipitacion;
-        for (let b of buckets) {
-            if (p >= b.min && p <= b.max) {
-                b.states.push(item.estado);
-                b.sumRend += item.rendimiento;
-                b.sumProd += item.produccion;
-                b.sumConsumo += item.consumoTotal;
-                break;
-            }
-        }
-    });
-
-    buckets.forEach(b => {
-        const avgRend = b.states.length > 0 ? (b.sumRend / b.states.length).toFixed(2) : 0;
-        csv += `"${b.label}",${b.states.length},"${b.states.join(', ')}",${avgRend},${b.sumProd},${b.sumConsumo}\n`;
-    });
-    
-    downloadCSV('Analisis_Intervalos_Precipitacion.csv', csv);
-});
-
-function renderPrecipitationIntervalChart() {
-    const buckets = [
-        { label: '0-300 mm\n(Arido/Seco)', min: 0, max: 300, states: [], color: '#f87171', sumRend: 0, sumProd: 0, sumConsumo: 0 },
-        { label: '300-600 mm\n(Semi-seco)', min: 301, max: 600, states: [], color: '#fbbf24', sumRend: 0, sumProd: 0, sumConsumo: 0 },
-        { label: '600-900 mm\n(Templado/Humedo)', min: 601, max: 900, states: [], color: '#34d399', sumRend: 0, sumProd: 0, sumConsumo: 0 },
-        { label: '900+ mm\n(Tropical/Abundante)', min: 901, max: 9999, states: [], color: '#00f2ff', sumRend: 0, sumProd: 0, sumConsumo: 0 }
-    ];
-
-    data.forEach(item => {
-        const p = item.precipitacion;
-        for (let b of buckets) {
-            if (p >= b.min && p <= b.max) {
-                b.states.push(item.estado);
-                b.sumRend += item.rendimiento;
-                b.sumProd += item.produccion;
-                b.sumConsumo += item.consumoTotal;
-                break;
-            }
-        }
-    });
-
-    const option = {
-        backgroundColor: 'transparent',
-        legend: {
-            data: ['Cantidad de Estados', 'Volumen de Producción', 'Volumen de Consumo', 'Prom. Rendimiento'],
-            textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
-            top: 0
-        },
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            borderColor: '#334155',
-            borderWidth: 1,
-            padding: [14, 18],
-            formatter: function(params) {
-                const b = buckets[params[0].dataIndex];
-                return `<div class="font-bold text-cyan-400 mb-1" style="font-size: 16px;">${b.label.replace('\n', ' ')}</div>
-                        <div class="text-xs text-slate-300 mb-2" style="max-width: 250px; white-space: normal;">Estados (${b.states.length}): ${b.states.join(', ')}</div>
-                        <div class="flex justify-between items-center gap-6 pt-1 border-t border-slate-700">
-                             <span class="text-slate-400 text-sm">Producción Neta:</span>
-                             <span class="font-mono font-bold text-white text-base">${formatNumber(b.sumProd)} ton</span>
-                        </div>
-                        <div class="flex justify-between items-center gap-6">
-                             <span class="text-slate-400 text-sm">Consumo Neto:</span>
-                             <span class="font-mono font-bold text-emerald-400 text-base">${formatNumber(b.sumConsumo)} ton</span>
-                        </div>
-                        <div class="flex justify-between items-center gap-6">
-                            <span class="text-slate-400 text-sm">Prom. Rendimiento:</span>
-                            <span class="font-mono font-bold text-emerald-400 text-base">${(b.sumRend / (b.states.length || 1)).toFixed(2)} <span class="text-xs font-normal">ton/ha</span></span>
-                        </div>`;
-            }
-        },
-        grid: { top: '15%', bottom: '15%', left: '5%', right: '5%', containLabel: true },
-        xAxis: {
-            type: 'category',
-            data: buckets.map(b => b.label),
-            axisLabel: { color: '#94a3b8', fontSize: 11, fontWeight: '600' }
-        },
-        yAxis: [
-            {
-                type: 'value',
-                name: 'Cantidad de Estados',
-                axisLabel: { color: '#94a3b8' },
-                splitLine: { show: false }
-            },
-            {
-                type: 'value',
-                name: 'Volúmenes (x 1,000 Ton) / Rend.',
-                nameLocation: 'end',
-                nameGap: 15,
-                nameTextStyle: { color: '#cbd5e1', fontWeight: 'bold', fontSize: 11, align: 'right' },
-                axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: (value) => formatNumber(value) },
-                splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
-            }
-        ],
-        series: [
-            {
-                name: 'Cantidad de Estados',
-                type: 'bar',
-                barWidth: '50%',
-                yAxisIndex: 0,
-                data: buckets.map(b => ({
-                    value: b.states.length,
-                    itemStyle: { color: b.color, borderRadius: [4, 4, 0, 0] }
-                })),
-                label: { show: true, position: 'top', color: '#fff', fontWeight: 'bold' }
-            },
-            {
-                name: 'Volumen de Producción',
-                type: 'line',
-                yAxisIndex: 1,
-                data: buckets.map(b => convertToK(b.sumProd)),
-                itemStyle: { color: '#94a3b8' },
-                symbolSize: 8,
-                lineStyle: { width: 3, type: 'dashed' }
-            },
-            {
-                name: 'Volumen de Consumo',
-                type: 'line',
-                yAxisIndex: 1,
-                data: buckets.map(b => convertToK(b.sumConsumo)),
-                itemStyle: { color: '#34d399' },
-                symbolSize: 8,
-                lineStyle: { width: 3 }
-            },
-            {
-                name: 'Prom. Rendimiento',
-                type: 'line',
-                yAxisIndex: 1,
-                data: buckets.map(b => (b.states.length > 0 ? (b.sumRend / b.states.length).toFixed(2) : 0)),
-                itemStyle: { color: '#10b981' },
-                symbolSize: 10,
-                lineStyle: { width: 4 }
-            }
-        ]
-    };
-
-    precipIntervalChart.setOption(option);
-}
 
