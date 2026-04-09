@@ -120,11 +120,11 @@ function parseAndInitData(csvText) {
 // 3. Histograma de Intervalos por Eficiencia (Rendimiento)
 function renderIntervalChart() {
     const buckets = [
-        { label: '0 a 2.5 ton/ha\n(Eficiencia Baja)', min: 0, max: 2.500, states: [], tooltipColor: '#ef4444', sumProduccion: 0, sumConsumo: 0 },
-        { label: '2.5 a 5.0 ton/ha\n(Eficiencia Regular)', min: 2.501, max: 5.000, states: [], tooltipColor: '#f97316', sumProduccion: 0, sumConsumo: 0 },
-        { label: '5.0 a 7.5 ton/ha\n(Eficiencia Buena)', min: 5.001, max: 7.500, states: [], tooltipColor: '#fbbf24', sumProduccion: 0, sumConsumo: 0 },
-        { label: '7.5 a 10.0 ton/ha\n(Eficiencia Muy Buena)', min: 7.501, max: 10.000, states: [], tooltipColor: '#34d399', sumProduccion: 0, sumConsumo: 0 },
-        { label: '+10.0 ton/ha\n(Nivel Exportación)', min: 10.001, max: 99999, states: [], tooltipColor: '#3b82f6', sumProduccion: 0, sumConsumo: 0 }
+        { label: '0 a 2.5 ton/ha\n(Eficiencia Baja)', min: 0, max: 2.500, states: [], tooltipColor: '#ef4444', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 },
+        { label: '2.5 a 5.0 ton/ha\n(Eficiencia Regular)', min: 2.501, max: 5.000, states: [], tooltipColor: '#f97316', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 },
+        { label: '5.0 a 7.5 ton/ha\n(Eficiencia Buena)', min: 5.001, max: 7.500, states: [], tooltipColor: '#fbbf24', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 },
+        { label: '7.5 a 10.0 ton/ha\n(Eficiencia Muy Buena)', min: 7.501, max: 10.000, states: [], tooltipColor: '#34d399', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 },
+        { label: '+10.0 ton/ha\n(Nivel Exportación)', min: 10.001, max: 99999, states: [], tooltipColor: '#3b82f6', sumProduccion: 0, sumConsumo: 0, sumPrecipitation: 0 }
     ];
 
     data.forEach(item => {
@@ -134,6 +134,7 @@ function renderIntervalChart() {
                 b.states.push(item);
                 b.sumProduccion += item.produccion;
                 b.sumConsumo += item.consumoTotal;
+                b.sumPrecipitation += item.precipitacion;
                 break;
             }
         }
@@ -142,7 +143,7 @@ function renderIntervalChart() {
     const intervalOption = {
         backgroundColor: 'transparent',
         legend: {
-            data: ['Cantidad de Estados', 'Volumen de Producción', 'Volumen de Consumo'],
+            data: ['Cantidad de Estados', 'Volumen de Producción', 'Volumen de Consumo', 'Precipitación Promedio'],
             textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
             top: 0
         },
@@ -174,9 +175,13 @@ function renderIntervalChart() {
                         <span class="text-sm font-semibold text-slate-300 mr-8">Rango: Producción Agregada:</span>
                         <span class="font-mono font-bold text-white">${formatNumber(b.sumProduccion)} ton</span>
                     </div>
-                    <div class="flex justify-between items-center mb-3">
+                    <div class="flex justify-between items-center mb-1">
                         <span class="text-sm font-semibold text-slate-300 mr-8">Rango: Consumo Agregado:</span>
                         <span class="font-mono font-bold text-white">${formatNumber(b.sumConsumo)} ton</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm font-semibold text-slate-300 mr-8">Precipitación Promedio:</span>
+                        <span class="font-mono font-bold text-cyan-400">${b.states.length > 0 ? (b.sumPrecipitation / b.states.length).toFixed(1) : 0} mm</span>
                     </div>
 
                     <div class="mb-1 text-slate-100 font-semibold text-xs border-t border-slate-600 pt-3">
@@ -249,6 +254,18 @@ function renderIntervalChart() {
                 itemStyle: { color: '#34d399' },
                 symbolSize: 8,
                 lineStyle: { width: 3 }
+            },
+            {
+                name: 'Precipitación Promedio',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => ({ 
+                    value: b.states.length > 0 ? (b.sumPrecipitation / b.states.length).toFixed(1) : 0,
+                    rawValue: b.states.length > 0 ? b.sumPrecipitation / b.states.length : 0 
+                })),
+                itemStyle: { color: '#22d3ee' },
+                symbolSize: 10,
+                lineStyle: { width: 4, type: 'dotted' }
             }
         ]
     };
@@ -260,11 +277,11 @@ function renderProdIntervalChart() {
     const totalNacional = data.reduce((sum, item) => sum + item.produccion, 0);
 
     const buckets = [
-        { label: '0 a 200k ton\n(Producción Marginal)', min: 0, max: 200000, states: [], tooltipColor: '#ef4444', sumProduccion: 0 },
-        { label: '200k a 500k ton\n(Productores Menores)', min: 200001, max: 500000, states: [], tooltipColor: '#f97316', sumProduccion: 0 },
-        { label: '500k a 1M ton\n(Productores Medios)', min: 500001, max: 1000000, states: [], tooltipColor: '#fbbf24', sumProduccion: 0 },
-        { label: '1M a 2M ton\n(Productores Mayores)', min: 1000001, max: 2000000, states: [], tooltipColor: '#34d399', sumProduccion: 0 },
-        { label: '+ 2 Millones ton\n(Megaproductores)', min: 2000001, max: 99999999, states: [], tooltipColor: '#3b82f6', sumProduccion: 0 }
+        { label: '0 a 200k ton\n(Producción Marginal)', min: 0, max: 200000, states: [], tooltipColor: '#ef4444', sumProduccion: 0, sumConsumo: 0 },
+        { label: '200k a 500k ton\n(Productores Menores)', min: 200001, max: 500000, states: [], tooltipColor: '#f97316', sumProduccion: 0, sumConsumo: 0 },
+        { label: '500k a 1M ton\n(Productores Medios)', min: 500001, max: 1000000, states: [], tooltipColor: '#fbbf24', sumProduccion: 0, sumConsumo: 0 },
+        { label: '1M a 2M ton\n(Productores Mayores)', min: 1000001, max: 2000000, states: [], tooltipColor: '#34d399', sumProduccion: 0, sumConsumo: 0 },
+        { label: '+ 2 Millones ton\n(Megaproductores)', min: 2000001, max: 99999999, states: [], tooltipColor: '#3b82f6', sumProduccion: 0, sumConsumo: 0 }
     ];
 
     data.forEach(item => {
@@ -273,6 +290,7 @@ function renderProdIntervalChart() {
             if (p >= b.min && p <= b.max) {
                 b.states.push(item);
                 b.sumProduccion += item.produccion;
+                b.sumConsumo += item.consumoTotal;
                 break;
             }
         }
@@ -281,7 +299,7 @@ function renderProdIntervalChart() {
     const option = {
         backgroundColor: 'transparent',
         legend: {
-            data: ['Cantidad de Estados (Escala Izquierda)', '% Participación del Mercado Nacional (Escala Derecha)'],
+            data: ['Cantidad de Estados', 'Volumen de Producción', 'Volumen de Consumo'],
             textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
             top: 0
         },
@@ -313,6 +331,10 @@ function renderProdIntervalChart() {
                     <div class="flex justify-between items-center mt-2 mb-1">
                         <span class="text-sm font-semibold text-slate-300 mr-8">Producción Neta del Grupo:</span>
                         <span class="font-mono font-bold text-white">${formatNumber(b.sumProduccion)} ton</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm font-semibold text-slate-300 mr-8">Consumo Neto del Grupo:</span>
+                        <span class="font-mono font-bold text-emerald-400">${formatNumber(b.sumConsumo)} ton</span>
                     </div>
                     <div class="flex justify-between items-center mb-3 border-t border-slate-600 pt-3">
                         <div class="mb-1 text-slate-100 font-semibold text-xs transition-colors">
@@ -346,13 +368,12 @@ function renderProdIntervalChart() {
             },
             {
                 type: 'value',
-                name: '% Part. de Mercado',
+                name: 'Volúmenes (x 1,000 Ton)',
                 nameLocation: 'end',
                 nameGap: 15,
-                nameTextStyle: { color: '#3b82f6', fontWeight: 'bold', fontSize: 13, align: 'right', padding: [0, -10, 10, 0] },
-                axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: '{value}%' },
-                splitLine: { show: false },
-                max: 100
+                nameTextStyle: { color: '#cbd5e1', fontWeight: 'bold', fontSize: 12, align: 'right' },
+                axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: (value) => formatNumber(value) },
+                splitLine: { show: false }
             }
         ],
         series: [
@@ -371,16 +392,22 @@ function renderProdIntervalChart() {
                 }
             },
             {
-                name: '% Participación del Mercado Nacional (Escala Derecha)',
+                name: 'Volumen de Producción',
                 type: 'line',
                 yAxisIndex: 1,
-                data: buckets.map(b => ({
-                    value: ((b.sumProduccion / totalNacional) * 100).toFixed(2),
-                    rawValue: b.sumProduccion
-                })),
-                itemStyle: { color: '#3b82f6' },
-                symbolSize: 10,
-                lineStyle: { width: 4 }
+                data: buckets.map(b => ({ value: convertToK(b.sumProduccion), rawValue: b.sumProduccion })),
+                itemStyle: { color: '#94a3b8' },
+                symbolSize: 8,
+                lineStyle: { width: 3, type: 'dashed' }
+            },
+            {
+                name: 'Volumen de Consumo',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => ({ value: convertToK(b.sumConsumo), rawValue: b.sumConsumo })),
+                itemStyle: { color: '#34d399' },
+                symbolSize: 8,
+                lineStyle: { width: 3 }
             }
         ]
     };
@@ -1144,13 +1171,13 @@ document.getElementById('btn-dl-prod-national').addEventListener('click', () => 
 });
 
 document.getElementById('btn-dl-precip-interval').addEventListener('click', () => {
-    let csv = 'Rango de Precipitacion (mm),Cantidad de Estados,Estados Integrantes,Promedio de Rendimiento (ton/ha)\n';
+    let csv = 'Rango de Precipitacion (mm),Cantidad de Estados,Estados Integrantes,Promedio de Rendimiento (ton/ha),Produccion Total (ton),Consumo Total (ton)\n';
     
     const buckets = [
-        { label: '0-300 mm (Arido/Seco)', min: 0, max: 300, states: [], sumRend: 0 },
-        { label: '300-600 mm (Semi-seco)', min: 301, max: 600, states: [], sumRend: 0 },
-        { label: '600-900 mm (Templado/Humedo)', min: 601, max: 900, states: [], sumRend: 0 },
-        { label: '900+ mm (Tropical/Abundante)', min: 901, max: 9999, states: [], sumRend: 0 }
+        { label: '0-300 mm (Arido/Seco)', min: 0, max: 300, states: [], sumRend: 0, sumProd: 0, sumConsumo: 0 },
+        { label: '300-600 mm (Semi-seco)', min: 301, max: 600, states: [], sumRend: 0, sumProd: 0, sumConsumo: 0 },
+        { label: '600-900 mm (Templado/Humedo)', min: 601, max: 900, states: [], sumRend: 0, sumProd: 0, sumConsumo: 0 },
+        { label: '900+ mm (Tropical/Abundante)', min: 901, max: 9999, states: [], sumRend: 0, sumProd: 0, sumConsumo: 0 }
     ];
 
     data.forEach(item => {
@@ -1159,6 +1186,8 @@ document.getElementById('btn-dl-precip-interval').addEventListener('click', () =
             if (p >= b.min && p <= b.max) {
                 b.states.push(item.estado);
                 b.sumRend += item.rendimiento;
+                b.sumProd += item.produccion;
+                b.sumConsumo += item.consumoTotal;
                 break;
             }
         }
@@ -1166,7 +1195,7 @@ document.getElementById('btn-dl-precip-interval').addEventListener('click', () =
 
     buckets.forEach(b => {
         const avgRend = b.states.length > 0 ? (b.sumRend / b.states.length).toFixed(2) : 0;
-        csv += `"${b.label}",${b.states.length},"${b.states.join(', ')}",${avgRend}\n`;
+        csv += `"${b.label}",${b.states.length},"${b.states.join(', ')}",${avgRend},${b.sumProd},${b.sumConsumo}\n`;
     });
     
     downloadCSV('Analisis_Intervalos_Precipitacion.csv', csv);
@@ -1174,10 +1203,10 @@ document.getElementById('btn-dl-precip-interval').addEventListener('click', () =
 
 function renderPrecipitationIntervalChart() {
     const buckets = [
-        { label: '0-300 mm\n(Arido/Seco)', min: 0, max: 300, states: [], color: '#f87171', sumRend: 0 },
-        { label: '300-600 mm\n(Semi-seco)', min: 301, max: 600, states: [], color: '#fbbf24', sumRend: 0 },
-        { label: '600-900 mm\n(Templado/Humedo)', min: 601, max: 900, states: [], color: '#34d399', sumRend: 0 },
-        { label: '900+ mm\n(Tropical/Abundante)', min: 901, max: 9999, states: [], color: '#00f2ff', sumRend: 0 }
+        { label: '0-300 mm\n(Arido/Seco)', min: 0, max: 300, states: [], color: '#f87171', sumRend: 0, sumProd: 0, sumConsumo: 0 },
+        { label: '300-600 mm\n(Semi-seco)', min: 301, max: 600, states: [], color: '#fbbf24', sumRend: 0, sumProd: 0, sumConsumo: 0 },
+        { label: '600-900 mm\n(Templado/Humedo)', min: 601, max: 900, states: [], color: '#34d399', sumRend: 0, sumProd: 0, sumConsumo: 0 },
+        { label: '900+ mm\n(Tropical/Abundante)', min: 901, max: 9999, states: [], color: '#00f2ff', sumRend: 0, sumProd: 0, sumConsumo: 0 }
     ];
 
     data.forEach(item => {
@@ -1186,6 +1215,8 @@ function renderPrecipitationIntervalChart() {
             if (p >= b.min && p <= b.max) {
                 b.states.push(item.estado);
                 b.sumRend += item.rendimiento;
+                b.sumProd += item.produccion;
+                b.sumConsumo += item.consumoTotal;
                 break;
             }
         }
@@ -1193,6 +1224,11 @@ function renderPrecipitationIntervalChart() {
 
     const option = {
         backgroundColor: 'transparent',
+        legend: {
+            data: ['Cantidad de Estados', 'Volumen de Producción', 'Volumen de Consumo', 'Prom. Rendimiento'],
+            textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
+            top: 0
+        },
         tooltip: {
             trigger: 'axis',
             axisPointer: { type: 'shadow' },
@@ -1205,6 +1241,14 @@ function renderPrecipitationIntervalChart() {
                 return `<div class="font-bold text-cyan-400 mb-1" style="font-size: 16px;">${b.label.replace('\n', ' ')}</div>
                         <div class="text-xs text-slate-300 mb-2" style="max-width: 250px; white-space: normal;">Estados (${b.states.length}): ${b.states.join(', ')}</div>
                         <div class="flex justify-between items-center gap-6 pt-1 border-t border-slate-700">
+                             <span class="text-slate-400 text-sm">Producción Neta:</span>
+                             <span class="font-mono font-bold text-white text-base">${formatNumber(b.sumProd)} ton</span>
+                        </div>
+                        <div class="flex justify-between items-center gap-6">
+                             <span class="text-slate-400 text-sm">Consumo Neto:</span>
+                             <span class="font-mono font-bold text-emerald-400 text-base">${formatNumber(b.sumConsumo)} ton</span>
+                        </div>
+                        <div class="flex justify-between items-center gap-6">
                             <span class="text-slate-400 text-sm">Prom. Rendimiento:</span>
                             <span class="font-mono font-bold text-emerald-400 text-base">${(b.sumRend / (b.states.length || 1)).toFixed(2)} <span class="text-xs font-normal">ton/ha</span></span>
                         </div>`;
@@ -1221,33 +1265,56 @@ function renderPrecipitationIntervalChart() {
                 type: 'value',
                 name: 'Cantidad de Estados',
                 axisLabel: { color: '#94a3b8' },
-                splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)' } }
+                splitLine: { show: false }
             },
             {
                 type: 'value',
-                name: 'Rendimiento Promedio',
-                axisLabel: { color: '#10b981', formatter: '{value} t/h' },
-                splitLine: { show: false }
+                name: 'Volúmenes (x 1,000 Ton) / Rend.',
+                nameLocation: 'end',
+                nameGap: 15,
+                nameTextStyle: { color: '#cbd5e1', fontWeight: 'bold', fontSize: 11, align: 'right' },
+                axisLabel: { color: '#94a3b8', fontWeight: '600', formatter: (value) => formatNumber(value) },
+                splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.4)', type: 'dashed' } }
             }
         ],
         series: [
             {
-                name: 'Estados',
+                name: 'Cantidad de Estados',
                 type: 'bar',
+                barWidth: '50%',
+                yAxisIndex: 0,
                 data: buckets.map(b => ({
                     value: b.states.length,
                     itemStyle: { color: b.color, borderRadius: [4, 4, 0, 0] }
                 })),
-                label: { show: true, position: 'top', color: '#fff' }
+                label: { show: true, position: 'top', color: '#fff', fontWeight: 'bold' }
             },
             {
-                name: 'Rendimiento Promedio',
+                name: 'Volumen de Producción',
                 type: 'line',
                 yAxisIndex: 1,
-                smooth: true,
+                data: buckets.map(b => convertToK(b.sumProd)),
+                itemStyle: { color: '#94a3b8' },
+                symbolSize: 8,
+                lineStyle: { width: 3, type: 'dashed' }
+            },
+            {
+                name: 'Volumen de Consumo',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => convertToK(b.sumConsumo)),
+                itemStyle: { color: '#34d399' },
+                symbolSize: 8,
+                lineStyle: { width: 3 }
+            },
+            {
+                name: 'Prom. Rendimiento',
+                type: 'line',
+                yAxisIndex: 1,
                 data: buckets.map(b => (b.states.length > 0 ? (b.sumRend / b.states.length).toFixed(2) : 0)),
                 itemStyle: { color: '#10b981' },
-                lineStyle: { width: 3 }
+                symbolSize: 10,
+                lineStyle: { width: 4 }
             }
         ]
     };
