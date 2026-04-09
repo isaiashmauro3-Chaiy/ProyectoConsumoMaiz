@@ -889,7 +889,7 @@ function renderMainChart() {
     stateSelector.value = "";
 
     titleSpan.innerHTML = 'por Entidad';
-    chartDesc.innerHTML = 'Comparativa de Producción vs Consumo, Métrica Terrestre y <b class="text-cyan-400">Precipitación</b>. He activado la lluvia de dos formas (Línea y Barra) para que decidas cuál prefieres manteniendo la otra oculta o ambas visibles.';
+    chartDesc.innerHTML = 'Comparativa de Producción vs Consumo, Métrica Terrestre y <b class="text-cyan-400">Precipitación</b>. <br><span class="text-slate-400 text-xs mt-1 block">⚠️ Nota: Datos exclusivos de los <b class="text-slate-200">18 estados</b> obtenidos para el ciclo <b class="text-slate-200">Octubre 2018 - Septiembre 2019</b>.</span>';
 
     myChart.clear();
     myChart.setOption(mainOption, true);
