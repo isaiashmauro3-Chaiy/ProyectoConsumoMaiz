@@ -1188,13 +1188,17 @@ function renderPrecipitationIntervalChart() {
         tooltip: {
             trigger: 'axis',
             axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#334155',
+            borderWidth: 1,
+            padding: [14, 18],
             formatter: function(params) {
                 const b = buckets[params[0].dataIndex];
-                return `<div class="font-bold text-cyan-400 mb-1">${b.label.replace('\n', ' ')}</div>
-                        <div class="text-xs text-slate-300 mb-1">Estados (${b.states.length}): ${b.states.join(', ')}</div>
-                        <div class="flex justify-between gap-4">
-                            <span>Prom. Rendimiento:</span>
-                            <span class="font-mono font-bold text-emerald-400">${(b.sumRend / (b.states.length || 1)).toFixed(2)} ton/ha</span>
+                return `<div class="font-bold text-cyan-400 mb-1" style="font-size: 16px;">${b.label.replace('\n', ' ')}</div>
+                        <div class="text-xs text-slate-300 mb-2" style="max-width: 250px; white-space: normal;">Estados (${b.states.length}): ${b.states.join(', ')}</div>
+                        <div class="flex justify-between items-center gap-6 pt-1 border-t border-slate-700">
+                            <span class="text-slate-400 text-sm">Prom. Rendimiento:</span>
+                            <span class="font-mono font-bold text-emerald-400 text-base">${(b.sumRend / (b.states.length || 1)).toFixed(2)} <span class="text-xs font-normal">ton/ha</span></span>
                         </div>`;
             }
         },
