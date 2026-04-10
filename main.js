@@ -31,25 +31,25 @@ let states = [];
 let mainOption = {};
 
 // 1. Cargar datos incrustados directamente para evitar errores de CORS al abrir localmente
-const rawCsvData = `Entidad,Sembrada (ha) [Oct18-Sep19],Cosechada (ha) [Oct18-Sep19],Siniestrada (ha) [Oct18-Sep19],Produccion (ton) [Oct18-Sep19],Rendimiento (ton/ha),Cultivo seleccionado,Consumo (I+J+K+L),Semilla para siembra [Oct18-Sep19],Para consumo de la familia [Oct18-Sep19],Para consumo de los animales [Oct18-Sep19],Para venta (Total),Para venta (Exportacion),Consumo total (H+M),total de precipitacion mm
-Baja California,719.41,719.41,0,8679.05,12.06,Maiz de Grano,6286.435,0.029,0.962,5293.885,991.56,0,6286.435,165.3
-Baja California Sur,6800.75,6800.75,0,61843.93,9.09,Maiz de Grano,37869.15,0.095,1.667,5312.262,32555.126,0,37869.15,132.8
-Chiapas,689822.29,672812.27,17010.02,1255419.51,1.87,Maiz de Grano,1084385.734,5185.905,133754.581,64331.839,881113.408,0,1084385.734,1720.5
-Chihuahua,214769.12,"214,493.12",276,1417389.66,6.61,Maiz de Grano,2582406.526,2152.877867,1094.194879,81409.42998,2497750.023,2889.1723,2585295.698,358.4
-Durango,121350.21,118266.21,3084,298842.99,2.53,Maiz de Grano,298564.161,1245.293,4293.042,33735.47,259290.357,18.789,298582.95,418.2
-Guerrero,491301.24,453209.95,38091.29,"1,292,294.44",2.85,Maiz de Grano,731011.751,4355.955,178633.473,190137.486,357884.836,0,731011.751,1080.4
-Hidalgo,231585.21,194046.55,37538.66,602021.35,3.1,Maiz de Grano,601215.282,4409.505,84897.932,74568.067,437339.778,0,601215.282,585.6
-Jalisco,589681.06,589681.06,0,3818364.89,6.48,Maiz de Grano,3408198.105,540.644,13013.482,364068.823,3030575.156,0,3408198.105,810.7
-Mexico,475809.03,469318.66,6490.37,1865010.36,3.97,Maiz de Grano,621496.911,13834.996,197055.764,139098.012,271508.139,0,621496.911,740.1
-Michoacan,441388.01,416775.01,24613,1945027.31,4.67,Maiz de Grano,2262398.628,11305.705,79855.539,189732.606,1981504.778,3186.737,2265585.365,785.4
-Nayarit,26003,25979,24,111199.26,4.28,Maiz de Grano,381922.645,190.536,5132.092,28171.378,348428.639,1656.818,383579.463,945.3
-Nuevo Leon,63332.84,63072.84,260,64811.82,1.03,Maiz de Grano,55973.436,2905.492,9901.355,19434.339,23732.25,0,55973.436,465.8
-Oaxaca,497732.21,463265.71,34466.5,"633,798.37",1.37,Maiz de Grano,353707.314,9005.615,158804.719,36709.604,149187.376,1138.351,354845.665,921.8
-Puebla,532963.63,517820.96,15142.67,893554.07,1.98,Maiz de Grano,696360.1,11177.268,182114.586,66365.842,436702.405,0,696360.1,845.2
-Queretaro,89997.76,67329.92,22667.84,1026623.8,3.3,Maiz de Grano,334367.666,1697.793,14022.222,34700.7,283946.95,0,334367.666,412.5
-Sinaloa,557279.25,556430.84,848.41,6440204.9,11.57,Maiz de Grano,7484681.071,1303.304,11957.818,29729.967,7441689.982,4718.4,7489399.471,533.2
-Veracruz,574332.8,510627.49,63705.31,1113138.53,2.18,Maiz de Grano,578869.96,5348.178,116947.91,89414.694,367159.178,0,578869.96,1045.2
-Zacatecas,142877,94859.4,48017.6,319911.17,3.37,Maiz de Grano,287027.695,15021.178,11025.695,66423.013,194557.81,0,287027.695,345.1`;
+const rawCsvData = `Entidad,Sembrada (ha) [Oct18-Sep19],Cosechada (ha) [Oct18-Sep19],Siniestrada (ha) [Oct18-Sep19],Produccion (ton) [Oct18-Sep19],Rendimiento (ton/ha),Cultivo seleccionado,Consumo (I+J+K+L),Semilla para siembra [Oct18-Sep19],Para consumo de la familia [Oct18-Sep19],Para consumo de los animales [Oct18-Sep19],Para venta (Total),Para venta (Exportacion),Consumo total (H+M),total de precipitacion mm,Tecnificado (Riego),No Tecnificado (Temporal)
+Chiapas,689822.29,672812.27,17010.02,1255419.51,1.87,Maiz de Grano,1084385.734,5185.905,133754.581,64331.839,881113.408,0,1084385.734,1720.5,10347.3,679475
+Jalisco,589681.06,589681.06,0,3818364.89,6.48,Maiz de Grano,3408198.105,540.644,13013.482,364068.823,3030575.156,0,3408198.105,810.7,89631.5,500049.5
+Veracruz,574332.8,510627.49,63705.31,1113138.53,2.18,Maiz de Grano,578869.96,5348.178,116947.91,89414.694,367159.178,0,578869.96,1045.2,18378.6,555954.2
+Sinaloa,557279.25,556430.84,848.41,6440204.9,11.57,Maiz de Grano,7484681.071,1303.304,11957.818,29729.967,7441689.982,4718.4,7489399.471,533.2,556722,557.3
+Puebla,532963.63,517820.96,15142.67,893554.07,1.98,Maiz de Grano,696360.1,11177.268,182114.586,66365.842,436702.405,0,696360.1,845.2,46367.8,486595.8
+Oaxaca,497732.21,463265.71,34466.5,"633,798.37",1.37,Maiz de Grano,353707.314,9005.615,158804.719,36709.604,149187.376,1138.351,354845.665,921.8,18913.8,478818.4
+Guerrero,491301.24,453209.95,38091.29,"1,292,294.44",2.85,Maiz de Grano,731011.751,4355.955,178633.473,190137.486,357884.836,0,731011.751,1080.4,13265.1,478036.1
+Mexico,475809.03,469318.66,6490.37,1865010.36,3.97,Maiz de Grano,621496.911,13834.996,197055.764,139098.012,271508.139,0,621496.911,740.1,49484.1,426324.9
+Michoacan,441388.01,416775.01,24613,1945027.31,4.67,Maiz de Grano,2262398.628,11305.705,79855.539,189732.606,1981504.778,3186.737,2265585.365,785.4,108140.1,333247.9
+Hidalgo,231585.21,194046.55,37538.66,602021.35,3.1,Maiz de Grano,601215.282,4409.505,84897.932,74568.067,437339.778,0,601215.282,585.6,41222.2,190363
+Chihuahua,214769.12,"214,493.12",276,1417389.66,6.61,Maiz de Grano,2582406.526,2152.877867,1094.194879,81409.42998,2497750.023,2889.1723,2585295.698,358.4,76457.8,138311.3
+Zacatecas,142877,94859.4,48017.6,319911.17,3.37,Maiz de Grano,287027.695,15021.178,11025.695,66423.013,194557.81,0,287027.695,345.1,15002.1,127874.9
+Durango,121350.21,118266.21,3084,298842.99,2.53,Maiz de Grano,298564.161,1245.293,4293.042,33735.47,259290.357,18.789,298582.95,418.2,17959.8,103390.4
+Queretaro,89997.76,67329.92,22667.84,1026623.8,3.3,Maiz de Grano,334367.666,1697.793,14022.222,34700.7,283946.95,0,334367.666,412.5,12149.7,77848.1
+Nuevo Leon,63332.84,63072.84,260,64811.82,1.03,Maiz de Grano,55973.436,2905.492,9901.355,19434.339,23732.25,0,55973.436,465.8,26789.8,36543
+Nayarit,26003,25979,24,111199.26,4.28,Maiz de Grano,381922.645,190.536,5132.092,28171.378,348428.639,1656.818,383579.463,945.3,10531.2,15471.8
+Baja California Sur,6800.75,6800.75,0,61843.93,9.09,Maiz de Grano,37869.15,0.095,1.667,5312.262,32555.126,0,37869.15,132.8,6800.8,0
+Baja California,719.41,719.41,0,8679.05,12.06,Maiz de Grano,6286.435,0.029,0.962,5293.885,991.56,0,6286.435,165.3,719.4,0`;
 
 parseAndInitData(rawCsvData);
 
@@ -74,7 +74,7 @@ function parseAndInitData(csvText) {
         let sembrada = parseFloat(cols[1]) || 0;
         let cosechada = parseFloat(cols[2]) || 0;
         let siniestrada = parseFloat(cols[3]) || 0;
-        let fugada = Math.max(0, sembrada - cosechada - siniestrada); // Cálculo del área perdida sin clasificar
+        let fugada = Math.max(0, sembrada - cosechada - siniestrada); 
 
         data.push({
             estado: cols[0],
@@ -90,7 +90,9 @@ function parseAndInitData(csvText) {
             ventaTotal: parseFloat(cols[11]) || 0,
             ventaExp: parseFloat(cols[12]) || 0,
             consumoTotal: parseFloat(cols[13]) || 0,
-            precipitacion: parseFloat(cols[14]) || 0
+            precipitacion: parseFloat(cols[14]) || 0,
+            tech: parseFloat(cols[15]) || 0,
+            noTech: parseFloat(cols[16]) || 0
         });
     }
 
@@ -117,7 +119,12 @@ function switchIntervalView(viewType) {
     currentIntervalView = viewType;
     
     // Actualizar estados visuales de los botones
-    const btnIds = { 'efficiency': 'btn-view-eff', 'scale': 'btn-view-scale', 'climate': 'btn-view-climate' };
+    const btnIds = { 
+        'efficiency': 'btn-view-eff', 
+        'scale': 'btn-view-scale', 
+        'tech': 'btn-view-tech',
+        'climate': 'btn-view-climate' 
+    };
     Object.keys(btnIds).forEach(key => {
         const btn = document.getElementById(btnIds[key]);
         if (!btn) return;
@@ -135,6 +142,7 @@ function switchIntervalView(viewType) {
     if (desc) {
         if (viewType === 'efficiency') desc.innerText = 'Analizando distribución por rango de eficiencia (ton/ha). Ideal para identificar la brecha técnica.';
         else if (viewType === 'scale') desc.innerText = 'Agrupación por volumen bruto de producción neta. Clasifica desde agricultura marginal hasta gigantes comerciales.';
+        else if (viewType === 'tech') desc.innerText = 'Comparativa de superficie Tecnificada (Riego) vs No Tecnificada (Temporal). Observa cómo la infraestructura impacta el rendimiento.';
         else if (viewType === 'climate') desc.innerText = 'Correlación entre niveles de lluvia (mm) y resultados agrícolas. Crucial para el análisis de resiliencia hídrica.';
     }
 
@@ -172,6 +180,16 @@ function renderMasterInterval(type) {
             { label: '900+ mm\n(Húmedo)', min: 901, max: 9999, states: [], color: '#00f2ff' }
         ];
         valueGetter = (item) => item.precipitacion;
+    } else if (type === 'tech') {
+        // Usamos los mismos buckets de eficiencia para ver cómo impacta la tecnificación en el rendimiento
+        buckets = [
+            { label: '0 a 2.5 ton/ha\n(Baja)', min: 0, max: 2.5, states: [], color: '#ef4444' },
+            { label: '2.5 a 5.0 ton/ha\n(Regular)', min: 2.501, max: 5, states: [], color: '#f97316' },
+            { label: '5.0 a 7.5 ton/ha\n(Buena)', min: 5.001, max: 7.5, states: [], color: '#fbbf24' },
+            { label: '7.5 a 10.0 ton/ha\n(Muy Buena)', min: 7.501, max: 10, states: [], color: '#34d399' },
+            { label: '+10.0 ton/ha\n(Exportación)', min: 10.001, max: 9991, states: [], color: '#3b82f6' }
+        ];
+        valueGetter = (item) => item.rendimiento;
     }
 
     // Inicializar acumuladores
@@ -181,7 +199,9 @@ function renderMasterInterval(type) {
         b.sumConsumo = 0;
         b.sumRend = 0;
         b.sumPrecip = 0;
-        b.sumHec = 0; // Nueva métrica: Superficie Cosechada
+        b.sumHec = 0; 
+        b.sumTec = 0;    // Superficie Tecnificada
+        b.sumNoTec = 0;  // Superficie No Tecnificada
     });
 
     // Agrupar datos
@@ -195,33 +215,51 @@ function renderMasterInterval(type) {
                 b.sumRend += item.rendimiento;
                 b.sumPrecip += item.precipitacion;
                 b.sumHec += item.cosechada;
+                b.sumTec += item.tech;
+                b.sumNoTec += item.noTech;
                 break;
             }
         }
     });
 
     // Filtrar series segun requerimiento
-    let finalLegend = ['Cantidad de Estados', 'Producción Total', 'Consumo Total', (type === 'efficiency' ? 'Hectáreas Cosechadas' : (type === 'climate' ? 'Prom. Rendimiento' : 'Precipitación Prom.'))];
-    let thirdMetricName = (type === 'climate' ? 'Prom. Rendimiento' : 'Precipitación Prom.');
+    let finalLegend = ['Cantidad de Estados', 'Producción Total', 'Consumo Total', 'Precipitación Prom.'];
     if (type === 'efficiency') {
-        thirdMetricName = 'Hectáreas Cosechadas';
         finalLegend = ['Cantidad de Estados', 'Hectáreas Cosechadas', 'Eficiencia Prom.'];
+    } else if (type === 'climate') {
+        finalLegend = ['Cantidad de Estados', 'Lluvia Prom.', 'Eficiencia Prom.'];
+    } else if (type === 'tech') {
+        finalLegend = ['Cantidad de Estados', 'Riego (Tecnificado)', 'Temporal (No Tecnificado)', 'Eficiencia Prom.'];
     }
 
-    let finalSeries = [
-        {
-            name: 'Cantidad de Estados',
-            type: 'bar',
-            barWidth: '45%',
-            data: buckets.map(b => ({
-                value: b.stateData.length,
-                itemStyle: { color: b.color, borderRadius: [4, 4, 0, 0] }
-            })),
-            label: { show: true, position: 'top', color: '#cbd5e1', fontSize: 10 }
-        }
-    ];
+    let finalSeries = [];
 
-    if (type !== 'efficiency') {
+    // 1. Serie base: Cantidad de Estados (Barras de fondo en algunas vistas)
+    const stateCountSeries = {
+        name: 'Cantidad de Estados',
+        type: 'bar',
+        barWidth: (type === 'tech' || type === 'scale') ? '70%' : '45%',
+        data: buckets.map(b => ({
+            value: b.stateData.length,
+            itemStyle: { 
+                color: (type === 'tech' || type === 'scale') ? b.color + '22' : b.color, 
+                borderRadius: [4, 4, 0, 0] 
+            }
+        })),
+        label: { 
+            show: (type !== 'tech' && type !== 'scale'), 
+            position: 'top', 
+            color: '#cbd5e1', 
+            fontSize: 10 
+        }
+    };
+
+    if (type !== 'tech' && type !== 'scale') {
+        finalSeries.push(stateCountSeries);
+    }
+
+    // Lógica para añadir Prod/Cons (Solo en Scale)
+    if (type === 'scale') {
         finalSeries.push(
             {
                 name: 'Producción Total',
@@ -244,7 +282,7 @@ function renderMasterInterval(type) {
         );
     }
 
-    // Agregar métricas específicas (Eficiencia / Hectáreas / Clima)
+    // Agregar métricas técnicas/climáticas/tecnificadas
     if (type === 'efficiency') {
         finalSeries.push(
             {
@@ -252,7 +290,7 @@ function renderMasterInterval(type) {
                 type: 'line',
                 yAxisIndex: 1,
                 data: buckets.map(b => convertToK(b.sumHec)),
-                itemStyle: { color: '#fbbf24' },
+                itemStyle: { color: '#f97316' }, // Naranja
                 symbolSize: 8,
                 lineStyle: { width: 3 }
             },
@@ -261,28 +299,65 @@ function renderMasterInterval(type) {
                 type: 'line',
                 yAxisIndex: 1,
                 data: buckets.map(b => (b.sumRend / (b.stateData.length || 1)).toFixed(2)),
-                itemStyle: { color: '#10b981' },
+                itemStyle: { color: '#fbbf24' }, // Ámbar
                 symbolSize: 8,
                 lineStyle: { width: 3 }
             }
         );
-    } else {
-        finalSeries.push({
-            name: thirdMetricName,
-            type: 'line',
-            yAxisIndex: 1,
-            data: buckets.map(b => {
-                if (type === 'climate') return (b.sumRend / (b.stateData.length || 1)).toFixed(2);
-                return (b.sumPrecip / (b.stateData.length || 1)).toFixed(1);
-            }),
-            itemStyle: { color: (type === 'climate' ? '#10b981' : '#06b6d4') },
-            symbolSize: 8,
-            lineStyle: { width: 3 }
-        });
-    }
-
-    if (type === 'scale') {
-        finalLegend = ['Producción Total', 'Consumo Total', 'Eficiencia Prom.', 'Lluvia Prom.'];
+    } else if (type === 'tech') {
+        finalSeries.push(
+            {
+                name: 'Temporal (No Tecnificado)',
+                type: 'bar',
+                yAxisIndex: 1,
+                barWidth: '35%',
+                data: buckets.map(b => convertToK(b.sumNoTec)),
+                itemStyle: { color: '#94a3b8', borderRadius: [6, 6, 0, 0] }, // Gris Slate
+                label: { show: true, position: 'top', color: '#94a3b8', fontSize: 10, fontWeight: 'bold', formatter: (v) => v.value > 0 ? formatNumber(v.value) : '' }
+            },
+            {
+                name: 'Riego (Tecnificado)',
+                type: 'bar',
+                yAxisIndex: 1,
+                barWidth: '30%',
+                data: buckets.map(b => convertToK(b.sumTec)),
+                itemStyle: { color: '#10b981', borderRadius: [6, 6, 0, 0] }, // Verde Esmeralda
+                label: { show: true, position: 'top', color: '#10b981', fontSize: 10, fontWeight: 'bold', formatter: (v) => v.value > 0 ? formatNumber(v.value) : '' }
+            },
+            {
+                name: 'Eficiencia Prom.',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => (b.sumRend / (b.stateData.length || 1)).toFixed(2)),
+                itemStyle: { color: '#fbbf24' }, // Ámbar
+                symbolSize: 10,
+                lineStyle: { width: 4, shadowBlur: 10, shadowColor: 'rgba(251, 191, 36, 0.5)' }
+            }
+        );
+    } else if (type === 'climate') {
+        finalSeries.push(
+            {
+                name: 'Lluvia Prom.',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => (b.sumPrecip / (b.stateData.length || 1)).toFixed(1)),
+                itemStyle: { color: '#3b82f6' }, // Azul
+                symbolSize: 8,
+                lineStyle: { width: 3 }
+            },
+            {
+                name: 'Eficiencia Prom.',
+                type: 'line',
+                yAxisIndex: 1,
+                data: buckets.map(b => (b.sumRend / (b.stateData.length || 1)).toFixed(2)),
+                itemStyle: { color: '#fbbf24' }, // Ámbar
+                symbolSize: 8,
+                lineStyle: { width: 3 }
+            }
+        );
+    } else if (type === 'scale') {
+        // En scale ya añadimos Prod/Cons arriba, ahora añadimos Eficiencia
+        finalLegend = ['Producción Total', 'Consumo Total', 'Eficiencia Prom.'];
         finalSeries = [
             {
                 name: 'Producción Total',
@@ -305,21 +380,16 @@ function renderMasterInterval(type) {
                 type: 'line',
                 yAxisIndex: 1,
                 data: buckets.map(b => (b.sumRend / (b.stateData.length || 1)).toFixed(2)),
-                itemStyle: { color: '#10b981' },
-                symbolSize: 8,
-                lineStyle: { width: 3 }
-            },
-            {
-                name: 'Lluvia Prom.',
-                type: 'line',
-                yAxisIndex: 1,
-                data: buckets.map(b => (b.sumPrecip / (b.stateData.length || 1)).toFixed(1)),
-                itemStyle: { color: '#06b6d4' },
+                itemStyle: { color: '#fbbf24' },
                 symbolSize: 8,
                 lineStyle: { width: 3 }
             }
         ];
     }
+    const isEff = (type === 'efficiency');
+    const isScale = (type === 'scale');
+    const isClimate = (type === 'climate');
+    const isTech = (type === 'tech');
 
     const option = {
         animationDuration: 1000,
@@ -341,17 +411,42 @@ function renderMasterInterval(type) {
                 const b = buckets[params[0].dataIndex];
                 const avgRend = (b.sumRend / (b.stateData.length || 1)).toFixed(2);
                 const avgPrecip = (b.sumPrecip / (b.stateData.length || 1)).toFixed(1);
-                const isEff = (type === 'efficiency');
                 
-                let rowsHtml = b.stateData.sort((a,b) => b.produccion - a.produccion).map(s => `
+                let rowsHtml = b.stateData.sort((a,b) => b.produccion - a.produccion).map(s => {
+                    if (isEff) {
+                        return `
+                        <tr class="border-b border-white/10 hover:bg-white/5 transition-all">
+                            <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
+                            <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
+                            <td class="py-3 px-3 text-right font-mono text-amber-400 text-[12px] font-black">${formatNumber(s.cosechada)}</td>
+                        </tr>`;
+                    }
+                    if (isClimate) {
+                        return `
+                        <tr class="border-b border-white/10 hover:bg-white/5 transition-all">
+                            <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
+                            <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
+                            <td class="py-3 px-3 text-right font-mono text-sky-400 text-[12px] font-black">${s.precipitacion.toFixed(0)}</td>
+                        </tr>`;
+                    }
+                    if (isTech) {
+                        return `
+                        <tr class="border-b border-white/10 hover:bg-white/5 transition-all">
+                            <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
+                            <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
+                            <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${formatNumber(s.tech)}</td>
+                            <td class="py-3 px-3 text-right font-mono text-slate-400 text-[12px] font-black">${formatNumber(s.noTech)}</td>
+                        </tr>`;
+                    }
+                    return `
                     <tr class="border-b border-white/10 hover:bg-white/5 transition-all">
                         <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
-                        ${isEff ? '' : `<td class="py-3 px-3 text-right font-mono text-slate-100 text-[12px] font-black">${formatNumber(s.produccion)}</td>`}
-                        ${isEff ? '' : `<td class="py-3 px-3 text-right font-mono text-emerald-400 text-[12px] font-black">${formatNumber(s.consumoTotal)}</td>`}
+                        <td class="py-3 px-3 text-right font-mono text-slate-100 text-[12px] font-black">${formatNumber(s.produccion)}</td>
+                        <td class="py-3 px-3 text-right font-mono text-emerald-400 text-[12px] font-black">${formatNumber(s.consumoTotal)}</td>
                         <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
-                        <td class="py-3 px-3 text-right font-mono text-${isEff ? 'amber-400' : 'sky-400'} text-[12px] font-black">${isEff ? formatNumber(s.cosechada) : s.precipitacion.toFixed(0)}</td>
-                    </tr>
-                `).join('');
+                        ${isScale ? '' : `<td class="py-3 px-3 text-right font-mono text-sky-400 text-[12px] font-black">${s.precipitacion.toFixed(0)}</td>`}
+                    </tr>`;
+                }).join('');
 
                 let html = `
                     <div class="mb-4">
@@ -367,19 +462,21 @@ function renderMasterInterval(type) {
                             <thead class="bg-white/10 text-slate-300 uppercase tracking-widest text-[10px]">
                                 <tr>
                                     <th class="p-3 text-left font-black">ESTADO</th>
-                                    ${isEff ? '' : '<th class="p-3 text-right font-black">PROD.</th>'}
-                                    ${isEff ? '' : '<th class="p-3 text-right font-black text-emerald-400">CONS.</th>'}
+                                    ${(isEff || isClimate || isTech) ? '' : '<th class="p-3 text-right font-black">PROD.</th>'}
+                                    ${(isEff || isClimate || isTech) ? '' : '<th class="p-3 text-right font-black text-emerald-400">CONS.</th>'}
                                     <th class="p-3 text-right font-black text-cyan-400">EF.</th>
-                                    <th class="p-3 text-right font-black text-${isEff ? 'amber-400' : 'sky-400'}">${isEff ? 'HEC.' : 'LLUV.'}</th>
+                                    ${isScale ? '' : `<th class="p-3 text-right font-black text-${isEff ? 'amber-400' : (isTech ? 'cyan-400' : 'sky-400')}">${isEff ? 'HEC.' : (isTech ? 'RIEG.' : 'LLUV.')}</th>`}
+                                    ${isTech ? '<th class="p-3 text-right font-black text-slate-400">TEMP.</th>' : ''}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${rowsHtml || `<tr><td colspan="${isEff ? 3 : 5}" class="py-10 text-center text-slate-500 italic font-black text-base">Sin registros</td></tr>`}
+                                ${rowsHtml || `<tr><td colspan="${(isEff || isClimate) ? 3 : (isTech ? 4 : (isScale ? 4 : 5))}" class="py-10 text-center text-slate-500 italic font-black text-base">Sin registros</td></tr>`}
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-x-10 gap-y-5 border-t border-white/20 pt-5 mt-2">
+                    <div class="grid ${isTech ? 'grid-cols-3' : 'grid-cols-2'} gap-x-5 gap-y-5 border-t border-white/20 pt-5 mt-2">
+                        ${(isClimate || isTech) ? '' : `
                         <div>
                             <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">TOTAL PRODUCCIÓN</div>
                             <div class="font-mono font-black text-white text-base">${formatNumber(b.sumProd)} <span class="text-[11px] font-normal text-slate-500">ton</span></div>
@@ -387,15 +484,24 @@ function renderMasterInterval(type) {
                         <div class="text-right">
                             <div class="text-[10px] text-emerald-600 uppercase font-black tracking-widest text-right mb-1">TOTAL CONSUMO</div>
                             <div class="font-mono font-black text-emerald-400 text-base">${formatNumber(b.sumConsumo)} <span class="text-[11px] font-normal text-slate-500">ton</span></div>
-                        </div>
-                        <div>
+                        </div>`}
+                        <div class="${isClimate ? 'col-span-1' : (isTech ? 'col-span-1' : '')}">
                             <div class="text-[10px] text-cyan-600 uppercase font-black tracking-widest mb-1">EFICIENCIA PROM.</div>
                             <div class="font-mono font-black text-cyan-400 text-base">${avgRend} <span class="text-[11px] font-normal text-slate-700">t/ha</span></div>
                         </div>
+                        ${isScale ? '' : (isTech ? `
+                        <div class="text-center col-span-1">
+                            <div class="text-[10px] text-cyan-600 uppercase font-black tracking-widest mb-1">TOTAL RIEGO</div>
+                            <div class="font-mono font-black text-cyan-400 text-base">${formatNumber(b.sumTec.toFixed(1))} <span class="text-[11px] font-normal text-slate-700">ha</span></div>
+                        </div>
+                        <div class="text-right col-span-1">
+                            <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest text-right mb-1">TOTAL TEMPORAL</div>
+                            <div class="font-mono font-black text-slate-400 text-base">${formatNumber(b.sumNoTec.toFixed(1))} <span class="text-[11px] font-normal text-slate-700">ha</span></div>
+                        </div>` : `
                         <div class="text-right">
                             <div class="text-[10px] text-${isEff ? 'amber-600' : 'sky-600'} uppercase font-black tracking-widest text-right mb-1">${isEff ? 'TOTAL HECTÁREAS' : 'LLUVIA PROM.'}</div>
                             <div class="font-mono font-black text-${isEff ? 'amber-400' : 'sky-400'} text-base">${isEff ? formatNumber(b.sumHec) : avgPrecip} <span class="text-[11px] font-normal text-slate-700">${isEff ? 'ha' : 'mm'}</span></div>
-                        </div>
+                        </div>`)}
                     </div>`;
                 
                 return html;
@@ -405,14 +511,31 @@ function renderMasterInterval(type) {
         xAxis: {
             type: 'category',
             data: buckets.map(b => b.label),
-            axisLabel: { color: '#94a3b8', fontSize: 10, fontWeight: '600' }
+            axisLabel: { 
+                color: '#94a3b8', 
+                fontSize: 10, 
+                fontWeight: '600',
+                formatter: (val) => val.replace(' ton/ha', '') // Simplificar etiquetas para evitar clutter
+            }
         },
         yAxis: [
-            { type: 'value', name: 'Estados', axisLabel: { color: '#64748b' }, splitLine: { show: false }, show: (type !== 'scale') },
             { 
                 type: 'value', 
-                name: 'Toneladas Metricas (k)', 
-                axisLabel: { color: '#64748b', formatter: (v) => v >= 1000 ? (v/1000).toFixed(1)+'M' : v+'k' },
+                name: 'Estados', 
+                axisLabel: { color: '#64748b' }, 
+                splitLine: { show: false }, 
+                show: (!isTech && !isScale) 
+            },
+            { 
+                type: 'value', 
+                name: isTech ? 'Hectáreas (k) / Eficiencia' : (isEff ? 'Hectáreas (k) / Eficiencia' : 'Toneladas Metricas (k)'), 
+                axisLabel: { 
+                    color: '#64748b', 
+                    formatter: (v) => {
+                        if (isEff || isTech || isClimate) return formatNumber(v);
+                        return v >= 1000 ? (v/1000).toFixed(1)+'M' : v+'k';
+                    }
+                },
                 splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } }
             }
         ],
@@ -1098,6 +1221,9 @@ document.getElementById('btn-dl-interval-master').addEventListener('click', () =
     } else if (type === 'scale') {
         csv = 'Categoria de Escala de Produccion,Cantidad de Estados,Estados Integrantes,Produccion Total (Ton),Consumo Total (Ton),Rendimiento Promedio (ton/ha)\n';
         fn = 'Analisis_Intervalos_Escala.csv';
+    } else if (type === 'tech') {
+        csv = 'Rango de Eficiencia,Cantidad de Estados,Estados Integrantes,Superficie Riego (ha),Superficie Temporal (ha),Eficiencia Promedio\n';
+        fn = 'Analisis_Tecnificacion.csv';
     } else {
         csv = 'Rango de Precipitacion (mm),Cantidad de Estados,Estados Integrantes,Produccion Total (Ton),Consumo Total (Ton),Rendimiento Promedio (ton/ha)\n';
         fn = 'Analisis_Intervalos_Clima.csv';
@@ -1146,6 +1272,17 @@ function calculateBucketsForCSV(type) {
         ];
         getter = (i) => i.produccion;
         extraGetter = (i) => i.rendimiento;
+    } else if (type === 'tech') {
+        buckets = [
+            { label: '0-2.5 ton/ha', min: 0, max: 2.5, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0, sumExtra2: 0 },
+            { label: '2.5-5.0 ton/ha', min: 2.501, max: 5, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0, sumExtra2: 0 },
+            { label: '5.0-7.5 ton/ha', min: 5.001, max: 7.5, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0, sumExtra2: 0 },
+            { label: '7.5-10.0 ton/ha', min: 7.501, max: 10, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0, sumExtra2: 0 },
+            { label: '10.0+ ton/ha', min: 10.001, max: 999, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0, sumExtra2: 0 }
+        ];
+        getter = (i) => i.rendimiento;
+        extraGetter = (i) => i.tech;
+        extra2Getter = (i) => i.noTech;
     } else {
         buckets = [
             { label: '0-300 mm', min: 0, max: 300, states: [], sumProd: 0, sumConsumo: 0, sumExtra: 0 },
@@ -1165,6 +1302,9 @@ function calculateBucketsForCSV(type) {
                 b.sumProd += item.produccion;
                 b.sumConsumo += item.consumoTotal;
                 b.sumExtra += extraGetter(item);
+                if (typeof extra2Getter === 'function') {
+                    b.sumExtra2 += extra2Getter(item);
+                }
                 break;
             }
         }
