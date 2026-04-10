@@ -30,6 +30,38 @@ let data = [];
 let states = [];
 let mainOption = {};
 
+// 2. Contenido de Narrativa Analítica (Conectividad)
+const masterNarrativeData = {
+    'scale': {
+        title: '¿Cuánto producimos y comemos?',
+        icon: '⚖️',
+        analysis: 'Aquí comparamos cuánto maíz producimos contra cuánto comemos. Nos ayuda a ver en qué niveles de eficiencia está la mayor parte del alimento de México.',
+        connection: '¿Cuánta tierra necesitamos para esto? Míralo en la pestaña de <b>Eficiencia</b>.',
+        color: 'slate'
+    },
+    'efficiency': {
+        title: 'Aprovechar bien la tierra',
+        icon: '🎯',
+        analysis: 'Esta parte muestra si estamos usando bien el suelo. A veces, producir mucho no significa ser eficiente; aquí vemos cuántas toneladas logramos por cada pedazo de tierra.',
+        connection: '¿Este éxito viene del cielo o del trabajo humano? Analiza el impacto del <b>Clima</b>.',
+        color: 'amber'
+    },
+    'climate': {
+        title: '¿Dependemos de la lluvia?',
+        icon: '☁️',
+        analysis: 'Analizamos si el éxito de la cosecha depende solo de la buena lluvia. Es clave para saber qué estados dependen del clima y cuáles tienen ayuda externa.',
+        connection: 'Si hay poca lluvia pero mucha eficiencia, la respuesta es el riego. Mira la <b>Tecnificación</b>.',
+        color: 'sky'
+    },
+    'tech': {
+        title: 'Vencer a la sequía',
+        icon: '🏗️',
+        analysis: 'Esta es la respuesta final: cómo el riego artificial vence a la falta de agua. Muestra que con tecnología el campo puede exportar, sin importar si llueve poco.',
+        connection: 'Con tecnología, el campo pasa de ser para consumo familiar a ser una industria.',
+        color: 'emerald'
+    }
+};
+
 // 1. Cargar datos incrustados directamente para evitar errores de CORS al abrir localmente
 const rawCsvData = `Entidad,Sembrada (ha) [Oct18-Sep19],Cosechada (ha) [Oct18-Sep19],Siniestrada (ha) [Oct18-Sep19],Produccion (ton) [Oct18-Sep19],Rendimiento (ton/ha),Cultivo seleccionado,Consumo (I+J+K+L),Semilla para siembra [Oct18-Sep19],Para consumo de la familia [Oct18-Sep19],Para consumo de los animales [Oct18-Sep19],Para venta (Total),Para venta (Exportacion),Consumo total (H+M),total de precipitacion mm,Tecnificado (Riego),No Tecnificado (Temporal)
 Chiapas,689822.29,672812.27,17010.02,1255419.51,1.87,Maiz de Grano,1084385.734,5185.905,133754.581,64331.839,881113.408,0,1084385.734,1720.5,10347.3,679475
@@ -108,6 +140,7 @@ function parseAndInitData(csvText) {
 
     initOptions();
     renderMainChart();
+    updateMasterNarrative('scale');
     renderMasterInterval('scale');
     renderNationalChart();
     renderProdNationalChart();
@@ -115,8 +148,44 @@ function parseAndInitData(csvText) {
 
 // --- LOGICA DE TABLERO MAESTRO DE INTERVALOS ---
 
+function updateMasterNarrative(type) {
+    const container = document.getElementById('master-narrative-container');
+    if (!container) return;
+
+    const n = masterNarrativeData[type];
+    const colorClass = n.color === 'emerald' ? 'text-emerald-400' : (n.color === 'amber' ? 'text-amber-400' : (n.color === 'sky' ? 'text-sky-400' : 'text-slate-300'));
+    const borderClass = n.color === 'emerald' ? 'border-emerald-500/30' : (n.color === 'amber' ? 'border-amber-500/30' : (n.color === 'sky' ? 'border-sky-500/30' : 'border-slate-500/30'));
+
+    container.className = `mt-4 p-5 rounded-xl border transition-all duration-500 bg-slate-900/40 backdrop-blur-sm ${borderClass}`;
+    
+    container.innerHTML = `
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div class="w-16 h-16 rounded-2xl bg-slate-800/80 border border-white/10 flex items-center justify-center text-3xl shadow-inner shrink-0">
+                ${n.icon}
+            </div>
+            <div class="flex-grow">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Perspectiva Analítica</span>
+                    <div class="h-[1px] flex-grow bg-white/5"></div>
+                </div>
+                <h3 class="text-xl font-black ${colorClass} mb-2 tracking-tight">${n.title}</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-4">${n.analysis}</p>
+                
+                <div class="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
+                    <span class="text-lg">🛤️</span>
+                    <p class="text-[12px] text-slate-300 font-medium">
+                        <span class="font-black text-white uppercase text-[10px] mr-2 px-1.5 py-0.5 bg-slate-700 rounded-sm">Paso Maestro:</span>
+                        ${n.connection}
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function switchIntervalView(viewType) {
     currentIntervalView = viewType;
+    updateMasterNarrative(viewType);
     
     // Actualizar estados visuales de los botones
     const btnIds = { 
@@ -225,7 +294,7 @@ function renderMasterInterval(type) {
     // Filtrar series segun requerimiento
     let finalLegend = ['Cantidad de Estados', 'Producción Total', 'Consumo Total', 'Precipitación Prom.'];
     if (type === 'efficiency') {
-        finalLegend = ['Cantidad de Estados', 'Hectáreas Cosechadas', 'Eficiencia Prom.'];
+        finalLegend = ['Cantidad de Estados', 'Eficiencia Prom.'];
     } else if (type === 'climate') {
         finalLegend = ['Cantidad de Estados', 'Lluvia Prom.', 'Eficiencia Prom.'];
     } else if (type === 'tech') {
@@ -285,15 +354,6 @@ function renderMasterInterval(type) {
     // Agregar métricas técnicas/climáticas/tecnificadas
     if (type === 'efficiency') {
         finalSeries.push(
-            {
-                name: 'Hectáreas Cosechadas',
-                type: 'line',
-                yAxisIndex: 1,
-                data: buckets.map(b => convertToK(b.sumHec)),
-                itemStyle: { color: '#f97316' }, // Naranja
-                symbolSize: 8,
-                lineStyle: { width: 3 }
-            },
             {
                 name: 'Eficiencia Prom.',
                 type: 'line',
@@ -417,15 +477,14 @@ function renderMasterInterval(type) {
                         return `
                         <tr class="border-b border-white/10 hover:bg-white/5 transition-all">
                             <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
-                            <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
-                            <td class="py-3 px-3 text-right font-mono text-amber-400 text-[12px] font-black">${formatNumber(s.cosechada)}</td>
+                            <td class="py-3 px-3 text-right font-mono text-amber-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
                         </tr>`;
                     }
                     if (isClimate) {
                         return `
                         <tr class="border-b border-white/10 hover:bg-white/5 transition-all">
                             <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
-                            <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
+                            <td class="py-3 px-3 text-right font-mono text-amber-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
                             <td class="py-3 px-3 text-right font-mono text-sky-400 text-[12px] font-black">${s.precipitacion.toFixed(0)}</td>
                         </tr>`;
                     }
@@ -433,7 +492,7 @@ function renderMasterInterval(type) {
                         return `
                         <tr class="border-b border-white/10 hover:bg-white/5 transition-all">
                             <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
-                            <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
+                            <td class="py-3 px-3 text-right font-mono text-amber-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
                             <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${formatNumber(s.tech)}</td>
                             <td class="py-3 px-3 text-right font-mono text-slate-400 text-[12px] font-black">${formatNumber(s.noTech)}</td>
                         </tr>`;
@@ -443,7 +502,7 @@ function renderMasterInterval(type) {
                         <td class="py-3 px-3 text-white font-black text-[13px] whitespace-nowrap">${s.estado}</td>
                         <td class="py-3 px-3 text-right font-mono text-slate-100 text-[12px] font-black">${formatNumber(s.produccion)}</td>
                         <td class="py-3 px-3 text-right font-mono text-emerald-400 text-[12px] font-black">${formatNumber(s.consumoTotal)}</td>
-                        <td class="py-3 px-3 text-right font-mono text-cyan-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
+                        <td class="py-3 px-3 text-right font-mono text-amber-400 text-[12px] font-black">${s.rendimiento.toFixed(1)}</td>
                         ${isScale ? '' : `<td class="py-3 px-3 text-right font-mono text-sky-400 text-[12px] font-black">${s.precipitacion.toFixed(0)}</td>`}
                     </tr>`;
                 }).join('');
@@ -464,8 +523,8 @@ function renderMasterInterval(type) {
                                     <th class="p-3 text-left font-black">ESTADO</th>
                                     ${(isEff || isClimate || isTech) ? '' : '<th class="p-3 text-right font-black">PROD.</th>'}
                                     ${(isEff || isClimate || isTech) ? '' : '<th class="p-3 text-right font-black text-emerald-400">CONS.</th>'}
-                                    <th class="p-3 text-right font-black text-cyan-400">EF.</th>
-                                    ${isScale ? '' : `<th class="p-3 text-right font-black text-${isEff ? 'amber-400' : (isTech ? 'cyan-400' : 'sky-400')}">${isEff ? 'HEC.' : (isTech ? 'RIEG.' : 'LLUV.')}</th>`}
+                                    <th class="p-3 text-right font-black text-amber-400">EF.</th>
+                                    ${(isScale || isEff) ? '' : `<th class="p-3 text-right font-black text-${isTech ? 'cyan-400' : 'sky-400'}">${isTech ? 'RIEG.' : 'LLUV.'}</th>`}
                                     ${isTech ? '<th class="p-3 text-right font-black text-slate-400">TEMP.</th>' : ''}
                                 </tr>
                             </thead>
@@ -474,7 +533,7 @@ function renderMasterInterval(type) {
                             </tbody>
                         </table>
                     </div>
-
+ 
                     <div class="grid ${isTech ? 'grid-cols-3' : 'grid-cols-2'} gap-x-5 gap-y-5 border-t border-white/20 pt-5 mt-2">
                         ${(isClimate || isTech) ? '' : `
                         <div>
@@ -486,10 +545,10 @@ function renderMasterInterval(type) {
                             <div class="font-mono font-black text-emerald-400 text-base">${formatNumber(b.sumConsumo)} <span class="text-[11px] font-normal text-slate-500">ton</span></div>
                         </div>`}
                         <div class="${isClimate ? 'col-span-1' : (isTech ? 'col-span-1' : '')}">
-                            <div class="text-[10px] text-cyan-600 uppercase font-black tracking-widest mb-1">EFICIENCIA PROM.</div>
-                            <div class="font-mono font-black text-cyan-400 text-base">${avgRend} <span class="text-[11px] font-normal text-slate-700">t/ha</span></div>
+                            <div class="text-[10px] text-amber-600 uppercase font-black tracking-widest mb-1">EFICIENCIA PROM.</div>
+                            <div class="font-mono font-black text-amber-400 text-base">${avgRend} <span class="text-[11px] font-normal text-slate-700">t/ha</span></div>
                         </div>
-                        ${isScale ? '' : (isTech ? `
+                        ${(isScale || isEff) ? '' : (isTech ? `
                         <div class="text-center col-span-1">
                             <div class="text-[10px] text-cyan-600 uppercase font-black tracking-widest mb-1">TOTAL RIEGO</div>
                             <div class="font-mono font-black text-cyan-400 text-base">${formatNumber(b.sumTec.toFixed(1))} <span class="text-[11px] font-normal text-slate-700">ha</span></div>
@@ -499,8 +558,8 @@ function renderMasterInterval(type) {
                             <div class="font-mono font-black text-slate-400 text-base">${formatNumber(b.sumNoTec.toFixed(1))} <span class="text-[11px] font-normal text-slate-700">ha</span></div>
                         </div>` : `
                         <div class="text-right">
-                            <div class="text-[10px] text-${isEff ? 'amber-600' : 'sky-600'} uppercase font-black tracking-widest text-right mb-1">${isEff ? 'TOTAL HECTÁREAS' : 'LLUVIA PROM.'}</div>
-                            <div class="font-mono font-black text-${isEff ? 'amber-400' : 'sky-400'} text-base">${isEff ? formatNumber(b.sumHec) : avgPrecip} <span class="text-[11px] font-normal text-slate-700">${isEff ? 'ha' : 'mm'}</span></div>
+                            <div class="text-[10px] text-sky-600 uppercase font-black tracking-widest text-right mb-1">LLUVIA PROM.</div>
+                            <div class="font-mono font-black text-sky-400 text-base">${avgPrecip} <span class="text-[11px] font-normal text-slate-700">mm</span></div>
                         </div>`)}
                     </div>`;
                 

@@ -154,17 +154,17 @@
 
                 <!-- Selector de Perspectiva (Tabs) -->
                 <div class="flex bg-slate-900/50 p-1.5 rounded-xl border border-slate-700 w-full lg:w-auto shadow-inner">
-                    <button id="btn-view-eff" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white" onclick="switchIntervalView('efficiency')">
-                        <span>🎯</span> Eficiencia
-                    </button>
                     <button id="btn-view-scale" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg" onclick="switchIntervalView('scale')">
                         <span>⚖️</span> Escala
                     </button>
-                    <button id="btn-view-tech" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white" onclick="switchIntervalView('tech')">
-                        <span>🏗️</span> Tecnificación
+                    <button id="btn-view-eff" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white" onclick="switchIntervalView('efficiency')">
+                        <span>🎯</span> Eficiencia
                     </button>
                     <button id="btn-view-climate" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white" onclick="switchIntervalView('climate')">
                         <span>☁️</span> Clima
+                    </button>
+                    <button id="btn-view-tech" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white" onclick="switchIntervalView('tech')">
+                        <span>🏗️</span> Tecnificación
                     </button>
                 </div>
 
@@ -175,9 +175,19 @@
             </div>
 
             <!-- Contenedor Principal de la Gráfica -->
-            <div id="master-interval-container" class="w-full h-[450px] sm:h-[550px] flex-shrink-0 mb-6"></div>
+            <div id="master-interval-container" class="w-full h-[450px] sm:h-[550px] flex-shrink-0 mb-2"></div>
 
             <!-- Notas Dinámicas de Análisis -->
+            <div id="master-narrative-container" class="mt-0 p-5 rounded-xl border border-white/10 bg-slate-900/40 backdrop-blur-sm transition-all duration-500">
+                <!-- Se poblará dinámicamente desde main.js -->
+                <div class="flex items-center gap-4 animate-pulse">
+                    <div class="w-10 h-10 bg-slate-700 rounded-lg"></div>
+                    <div class="space-y-2 flex-grow">
+                        <div class="h-4 bg-slate-700 rounded w-1/4"></div>
+                        <div class="h-3 bg-slate-700 rounded w-3/4"></div>
+                    </div>
+                </div>
+            </div>
             <div id="master-interval-insights" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Nota de la Brecha (Reubicada) -->
                 <details class="bg-amber-900/10 border-l-4 border-amber-500/40 rounded-r-lg group overflow-hidden transition-all duration-300">
@@ -230,7 +240,7 @@
                 <span class="text-xs font-bold hidden sm:block">CSV</span>
             </button>
             <div class="flex justify-between items-start mb-2 pr-24">
-                <h2 class="text-xl sm:text-2xl font-bold text-yellow-400">Desempeño de Producción Nacional (SIAP 2019)</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-yellow-400">Producción Nacional (Ciclo Oct 18 - Sep 19)</h2>
                 <button id="btn-prod-back" class="hidden bg-yellow-600 hover:bg-yellow-500 text-slate-900 font-bold py-1.5 px-4 rounded shadow-lg transition-all text-sm flex items-center gap-2">
                     ⬅️ Regresar a Totales
                 </button>
