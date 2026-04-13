@@ -1068,7 +1068,7 @@ function initOptions() {
             }
         },
         legend: {
-            data: ['Hectáreas Sembradas', 'Hectáreas Cosechadas', 'Hectáreas Siniestradas', 'Hectáreas Fugadas (No Cosechadas)', 'Producción Total', 'Semilla para siembra', 'Para consumo de la familia', 'Para consumo de animales', 'Para venta (Total)', 'Para venta (Exportacion)', 'Precipitación (Línea)'],
+            data: ['Hectáreas Sembradas', 'Hectáreas Cosechadas', 'Hectáreas Siniestradas', 'Hectáreas Fugadas (No Cosechadas)', 'Hectáreas Tecnificadas (Riego)', 'Hectáreas No Tecnificadas (Temporal)', 'Producción Total', 'Semilla para siembra', 'Para consumo de la familia', 'Para consumo de animales', 'Para venta (Total)', 'Para venta (Exportacion)', 'Precipitación (Línea)'],
             textStyle: { color: '#cbd5e1', fontSize: 12, fontWeight: '500' },
             top: 0, itemGap: 10
         },
@@ -1123,6 +1123,8 @@ function initOptions() {
             { name: 'Hectáreas Cosechadas', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.cosechada, rawValue: i.cosechada })), itemStyle: { color: '#10b981' }, symbolSize: 8, lineStyle: { width: 3 }, z: 9 },
             { name: 'Hectáreas Siniestradas', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.siniestrada, rawValue: i.siniestrada })), itemStyle: { color: '#ef4444' }, symbolSize: 8, lineStyle: { width: 3 }, z: 8 },
             { name: 'Hectáreas Fugadas (No Cosechadas)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.fugada, rawValue: i.fugada })), itemStyle: { color: '#f97316' }, symbolSize: 6, lineStyle: { width: 2, type: 'dotted' }, z: 7 },
+            { name: 'Hectáreas Tecnificadas (Riego)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.tech, rawValue: i.tech })), itemStyle: { color: '#06b6d4' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 6 },
+            { name: 'Hectáreas No Tecnificadas (Temporal)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.noTech, rawValue: i.noTech })), itemStyle: { color: '#64748b' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 5 },
             { name: 'Producción Total', type: 'bar', data: data.map(i => ({ value: convertToK(i.produccion), rawValue: i.produccion })), itemStyle: { color: '#94a3b8', borderRadius: [4, 4, 0, 0] } },
             { name: 'Semilla para siembra', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.semilla), rawValue: i.semilla })), itemStyle: { color: '#fbbf24' } },
             { name: 'Para consumo de la familia', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.familia), rawValue: i.familia })), itemStyle: { color: '#f87171' } },
@@ -1184,7 +1186,7 @@ function renderStateChart(stateName) {
         grid: { left: '2%', right: '4%', bottom: '10%', top: '25%', containLabel: true },
         xAxis: {
             type: 'category',
-            data: ['Sembrada\n(ha)', 'Cosechada\n(ha)', 'Siniestrada\n(ha)', 'Fugada\n(ha)', 'Producción', 'Semilla', 'Familia', 'Animales', 'Venta\n(Total)', 'Venta\n(Export)', 'Lluvia\n(mm)'],
+            data: ['Sembrada\n(ha)', 'Cosechada\n(ha)', 'Siniestrada\n(ha)', 'Fugada\n(ha)', 'Tecnificada\n(ha)', 'Temporal\n(ha)', 'Producción', 'Semilla', 'Familia', 'Animales', 'Venta\n(Total)', 'Venta\n(Export)', 'Lluvia\n(mm)'],
             axisLabel: { color: '#e2e8f0', fontSize: 13, fontWeight: '600', interval: 0, rotate: 15 },
             axisLine: { lineStyle: { color: '#475569', width: 2 } }
         },
@@ -1205,6 +1207,8 @@ function renderStateChart(stateName) {
                 { value: stateData.cosechada, rawValue: stateData.cosechada, itemStyle: { color: '#10b981', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.siniestrada, rawValue: stateData.siniestrada, itemStyle: { color: '#ef4444', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.fugada, rawValue: stateData.fugada, itemStyle: { color: '#f97316', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.tech, rawValue: stateData.tech, itemStyle: { color: '#06b6d4', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.noTech, rawValue: stateData.noTech, itemStyle: { color: '#64748b', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.produccion, rawValue: stateData.produccion, itemStyle: { color: '#94a3b8', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.semilla, rawValue: stateData.semilla, itemStyle: { color: '#fbbf24', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.familia, rawValue: stateData.familia, itemStyle: { color: '#f87171', borderRadius: [4, 4, 0, 0] } },
