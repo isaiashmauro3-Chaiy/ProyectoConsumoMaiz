@@ -1158,7 +1158,7 @@ function renderStateChart(stateName) {
     stateSelector.classList.add('hidden');
 
     titleSpan.innerHTML = `en <span class="text-white">${stateName}</span>`;
-    chartDesc.innerHTML = 'Detalle de estado. Diez columnas desplegadas representando desgloses puntuales e individuales libres de apilamiento cruzado.';
+    chartDesc.innerHTML = 'Detalle de estado. Trece columnas desplegadas representando desgloses puntuales e individuales libres de apilamiento cruzado.';
 
     const stateOption = {
         backgroundColor: 'transparent',
