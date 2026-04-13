@@ -33,31 +33,35 @@ let mainOption = {};
 // 2. Contenido de Narrativa Analítica (Conectividad)
 const masterNarrativeData = {
     'scale': {
-        title: '¿Cuánto producimos y comemos?',
+        title: 'Balance Nacional: Producción vs Demanda',
         icon: '⚖️',
-        analysis: 'Aquí comparamos cuánto maíz producimos contra cuánto comemos. Nos ayuda a ver en qué niveles de eficiencia está la mayor parte del alimento de México.',
-        connection: '¿Cuánta tierra necesitamos para esto? Míralo en la pestaña de <b>Eficiencia</b>.',
+        about: 'Esta gráfica analiza el volumen físico bruto de maíz. Su objetivo es detectar en qué niveles de producción se encuentra el mayor superávit o déficit alimentario del país.',
+        explanation: 'Las barras muestran la producción total agrupada, mientras que la línea verde representa el consumo. Buscamos identificar los intervalos donde la producción supera la demanda nacional.',
+        connection: 'Identificado el volumen, debemos analizar el costo de suelo: ¿Cuánta tierra usamos? Míralo en <b>Eficiencia</b>.',
         color: 'slate'
     },
     'efficiency': {
-        title: 'Aprovechar bien la tierra',
+        title: 'Productividad y Rendimiento del Suelo',
         icon: '🎯',
-        analysis: 'Esta parte muestra si estamos usando bien el suelo. A veces, producir mucho no significa ser eficiente; aquí vemos cuántas toneladas logramos por cada pedazo de tierra.',
-        connection: '¿Este éxito viene del cielo o del trabajo humano? Analiza el impacto del <b>Clima</b>.',
+        about: 'Aquí medimos la calidad de la producción, no solo la cantidad. Evalúa cuántas toneladas logramos extraer por cada hectárea de tierra utilizada.',
+        explanation: 'La línea ámbar es el promedio de rendimiento (t/ha). Si la línea sube pero las barras bajan, significa que pocos estados están siendo muy efectivos con poco suelo.',
+        connection: '¿Este éxito es natural o técnico? Analicemos si depende de la lluvia en la pestaña de <b>Clima</b>.',
         color: 'amber'
     },
     'climate': {
-        title: '¿Dependemos de la lluvia?',
+        title: 'Dependencia Ambiental (Precipitación)',
         icon: '☁️',
-        analysis: 'Analizamos si el éxito de la cosecha depende solo de la buena lluvia. Es clave para saber qué estados dependen del clima y cuáles tienen ayuda externa.',
-        connection: 'Si hay poca lluvia pero mucha eficiencia, la respuesta es el riego. Mira la <b>Tecnificación</b>.',
+        about: 'Esta visualización cruza el éxito agrícola con el clima. Su propósito es determinar qué estados son vulnerables a las sequías y cuáles son resilientes.',
+        explanation: 'Comparamos la eficiencia contra los milímetros de lluvia. Los estados que logran alta eficiencia con poca lluvia son los que tienen mejores sistemas de gestión hídrica.',
+        connection: 'La prueba final de esta resiliencia es el riego artificial. Descúbrelo en <b>Tecnificación</b>.',
         color: 'sky'
     },
     'tech': {
-        title: 'Vencer a la sequía',
+        title: 'Resiliencia Tecnológica (Riego vs Temporal)',
         icon: '🏗️',
-        analysis: 'Esta es la respuesta final: cómo el riego artificial vence a la falta de agua. Muestra que con tecnología el campo puede exportar, sin importar si llueve poco.',
-        connection: 'Con tecnología, el campo pasa de ser para consumo familiar a ser una industria.',
+        about: 'Es la conclusión del análisis. Compara el impacto directo de la inversión en infraestructura (riego) contra los métodos tradicionales (temporal).',
+        explanation: 'Aquí vemos cómo la tecnificación rompe la barrera del clima, permitiendo que estados en zonas secas tengan producciones de escala industrial y exportación.',
+        connection: 'Con tecnología, el agro mexicano pasa de la subsistencia a una industria competitiva global.',
         color: 'emerald'
     }
 };
@@ -156,25 +160,46 @@ function updateMasterNarrative(type) {
     const colorClass = n.color === 'emerald' ? 'text-emerald-400' : (n.color === 'amber' ? 'text-amber-400' : (n.color === 'sky' ? 'text-sky-400' : 'text-slate-300'));
     const borderClass = n.color === 'emerald' ? 'border-emerald-500/30' : (n.color === 'amber' ? 'border-amber-500/30' : (n.color === 'sky' ? 'border-sky-500/30' : 'border-slate-500/30'));
 
-    container.className = `mt-4 p-5 rounded-xl border transition-all duration-500 bg-slate-900/40 backdrop-blur-sm ${borderClass}`;
-    
-    container.innerHTML = `
-        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div class="w-16 h-16 rounded-2xl bg-slate-800/80 border border-white/10 flex items-center justify-center text-3xl shadow-inner shrink-0">
-                ${n.icon}
+    // 1. Renderizar el análisis breve en la parte superior
+    const topContainer = document.getElementById('master-top-analysis');
+    if (topContainer) {
+        topContainer.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="text-2xl">${n.icon}</div>
+                <div>
+                    <h4 class="text-sm font-bold ${colorClass}">¿De qué trata esta gráfica?</h4>
+                    <p class="text-slate-300 text-xs mt-0.5 leading-snug">${n.about}</p>
+                </div>
             </div>
+        `;
+    }
+    
+    // 2. Renderizar el análisis detallado en la parte inferior
+    container.className = `mt-4 p-5 rounded-xl border transition-all duration-500 bg-slate-900/40 backdrop-blur-sm ${borderClass}`;
+    container.innerHTML = `
+        <div class="flex flex-col md:flex-row items-start gap-6">
             <div class="flex-grow">
                 <div class="flex items-center gap-2 mb-1">
-                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Perspectiva Analítica</span>
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Desglose Analítico</span>
                     <div class="h-[1px] flex-grow bg-white/5"></div>
                 </div>
-                <h3 class="text-xl font-black ${colorClass} mb-2 tracking-tight">${n.title}</h3>
-                <p class="text-slate-400 text-sm leading-relaxed mb-4">${n.analysis}</p>
+                <h3 class="text-xl font-black ${colorClass} mb-3 tracking-tight">${n.title}</h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    <div class="p-4 rounded-lg bg-white/5 border border-white/5">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase mb-2">Propósito Técnico</div>
+                        <p class="text-slate-200 text-xs leading-relaxed">${n.about}</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-white/5 border border-white/5">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase mb-2">Análisis de Datos</div>
+                        <p class="text-slate-300 text-xs leading-relaxed italic">${n.explanation}</p>
+                    </div>
+                </div>
                 
                 <div class="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
                     <span class="text-lg">🛤️</span>
-                    <p class="text-[12px] text-slate-300 font-medium">
-                        <span class="font-black text-white uppercase text-[10px] mr-2 px-1.5 py-0.5 bg-slate-700 rounded-sm">Paso Maestro:</span>
+                    <p class="text-[11px] text-slate-300 font-medium">
+                        <span class="font-black text-white uppercase text-[9px] mr-2 px-1.5 py-0.5 bg-slate-700 rounded-sm">Paso Maestro:</span>
                         ${n.connection}
                     </p>
                 </div>
