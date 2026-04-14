@@ -397,8 +397,8 @@ function renderMasterInterval(type) {
                 yAxisIndex: 1,
                 barWidth: '35%',
                 data: buckets.map(b => convertToK(b.sumNoTec)),
-                itemStyle: { color: '#94a3b8', borderRadius: [6, 6, 0, 0] }, // Gris Slate
-                label: { show: true, position: 'top', color: '#94a3b8', fontSize: 10, fontWeight: 'bold', formatter: (v) => v.value > 0 ? formatNumber(v.value) : '' }
+                itemStyle: { color: '#8b5cf6', borderRadius: [6, 6, 0, 0] }, // Púrpura/Violeta
+                label: { show: true, position: 'top', color: '#8b5cf6', fontSize: 10, fontWeight: 'bold', formatter: (v) => v.value > 0 ? formatNumber(v.value) : '' }
             },
             {
                 name: 'Riego (Tecnificado)',
@@ -406,8 +406,8 @@ function renderMasterInterval(type) {
                 yAxisIndex: 1,
                 barWidth: '30%',
                 data: buckets.map(b => convertToK(b.sumTec)),
-                itemStyle: { color: '#10b981', borderRadius: [6, 6, 0, 0] }, // Verde Esmeralda
-                label: { show: true, position: 'top', color: '#10b981', fontSize: 10, fontWeight: 'bold', formatter: (v) => v.value > 0 ? formatNumber(v.value) : '' }
+                itemStyle: { color: '#ec4899', borderRadius: [6, 6, 0, 0] }, // Rosa/Fucsia
+                label: { show: true, position: 'top', color: '#ec4899', fontSize: 10, fontWeight: 'bold', formatter: (v) => v.value > 0 ? formatNumber(v.value) : '' }
             },
             {
                 name: 'Eficiencia Prom.',
@@ -1122,16 +1122,16 @@ function initOptions() {
             { name: 'Hectáreas Sembradas', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.sembrada, rawValue: i.sembrada })), itemStyle: { color: '#3b82f6' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 10 },
             { name: 'Hectáreas Cosechadas', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.cosechada, rawValue: i.cosechada })), itemStyle: { color: '#10b981' }, symbolSize: 8, lineStyle: { width: 3 }, z: 9 },
             { name: 'Hectáreas Siniestradas', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.siniestrada, rawValue: i.siniestrada })), itemStyle: { color: '#ef4444' }, symbolSize: 8, lineStyle: { width: 3 }, z: 8 },
-            { name: 'Hectáreas Fugadas (No Cosechadas)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.fugada, rawValue: i.fugada })), itemStyle: { color: '#f97316' }, symbolSize: 6, lineStyle: { width: 2, type: 'dotted' }, z: 7 },
-            { name: 'Hectáreas Tecnificadas (Riego)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.tech, rawValue: i.tech })), itemStyle: { color: '#06b6d4' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 6 },
-            { name: 'Hectáreas No Tecnificadas (Temporal)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.noTech, rawValue: i.noTech })), itemStyle: { color: '#64748b' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 5 },
+            { name: 'Hectáreas Fugadas (No Cosechadas)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.fugada, rawValue: i.fugada })), itemStyle: { color: '#f59e0b' }, symbolSize: 6, lineStyle: { width: 2, type: 'dotted' }, z: 7 },
+            { name: 'Hectáreas Tecnificadas (Riego)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.tech, rawValue: i.tech })), itemStyle: { color: '#ec4899' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 6 },
+            { name: 'Hectáreas No Tecnificadas (Temporal)', type: 'line', yAxisIndex: 1, data: data.map(i => ({ value: i.noTech, rawValue: i.noTech })), itemStyle: { color: '#8b5cf6' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 5 },
             { name: 'Producción Total', type: 'bar', data: data.map(i => ({ value: convertToK(i.produccion), rawValue: i.produccion })), itemStyle: { color: '#94a3b8', borderRadius: [4, 4, 0, 0] } },
             { name: 'Semilla para siembra', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.semilla), rawValue: i.semilla })), itemStyle: { color: '#fbbf24' } },
             { name: 'Para consumo de la familia', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.familia), rawValue: i.familia })), itemStyle: { color: '#f87171' } },
             { name: 'Para consumo de animales', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.animales), rawValue: i.animales })), itemStyle: { color: '#60a5fa' } },
             { name: 'Para venta (Total)', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.ventaTotal), rawValue: i.ventaTotal })), itemStyle: { color: '#34d399' } },
             { name: 'Para venta (Exportacion)', type: 'bar', stack: 'total', data: data.map(i => ({ value: convertToK(i.ventaExp), rawValue: i.ventaExp })), itemStyle: { color: '#c084fc', borderRadius: [2, 2, 0, 0] } },
-            { name: 'Precipitación (Línea)', type: 'line', yAxisIndex: 2, data: data.map(i => ({ value: i.precipitacion, rawValue: i.precipitacion })), itemStyle: { color: '#00f2ff' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 15 }
+            { name: 'Precipitación (Línea)', type: 'line', yAxisIndex: 2, data: data.map(i => ({ value: i.precipitacion, rawValue: i.precipitacion })), itemStyle: { color: '#eab308' }, symbolSize: 6, lineStyle: { width: 2, type: 'dashed' }, z: 15 }
         ]
     };
 }
@@ -1206,16 +1206,16 @@ function renderStateChart(stateName) {
                 { value: stateData.sembrada, rawValue: stateData.sembrada, itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.cosechada, rawValue: stateData.cosechada, itemStyle: { color: '#10b981', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.siniestrada, rawValue: stateData.siniestrada, itemStyle: { color: '#ef4444', borderRadius: [4, 4, 0, 0] } },
-                { value: stateData.fugada, rawValue: stateData.fugada, itemStyle: { color: '#f97316', borderRadius: [4, 4, 0, 0] } },
-                { value: stateData.tech, rawValue: stateData.tech, itemStyle: { color: '#06b6d4', borderRadius: [4, 4, 0, 0] } },
-                { value: stateData.noTech, rawValue: stateData.noTech, itemStyle: { color: '#64748b', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.fugada, rawValue: stateData.fugada, itemStyle: { color: '#f59e0b', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.tech, rawValue: stateData.tech, itemStyle: { color: '#ec4899', borderRadius: [4, 4, 0, 0] } },
+                { value: stateData.noTech, rawValue: stateData.noTech, itemStyle: { color: '#8b5cf6', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.produccion, rawValue: stateData.produccion, itemStyle: { color: '#94a3b8', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.semilla, rawValue: stateData.semilla, itemStyle: { color: '#fbbf24', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.familia, rawValue: stateData.familia, itemStyle: { color: '#f87171', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.animales, rawValue: stateData.animales, itemStyle: { color: '#60a5fa', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.ventaTotal, rawValue: stateData.ventaTotal, itemStyle: { color: '#34d399', borderRadius: [4, 4, 0, 0] } },
                 { value: stateData.ventaExp, rawValue: stateData.ventaExp, itemStyle: { color: '#c084fc', borderRadius: [4, 4, 0, 0] } },
-                { value: stateData.precipitacion, rawValue: stateData.precipitacion, itemStyle: { color: '#00f2ff', borderRadius: [4, 4, 0, 0] } }
+                { value: stateData.precipitacion, rawValue: stateData.precipitacion, itemStyle: { color: '#eab308', borderRadius: [4, 4, 0, 0] } }
             ],
             label: {
                 show: true,
